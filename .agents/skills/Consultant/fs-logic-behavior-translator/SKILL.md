@@ -16,7 +16,11 @@ Read the "Processing Logic" or "Business Rules" sections of the FS carefully:
    - Look for complex calculations that require reading external data, loops, or historical aggregation (e.g., calculating Opening/Closing balances using period-end anchors, complex fallback chains for text descriptions).
    - Flag these to be implemented as **Virtual Elements** (for read-only) or in the **Behavior Pool (AMDP/ABAP)**.
 4. **Identify Actions and Determinations:** (For transactional apps) Note any specific buttons that trigger business logic (e.g., "Approve Document").
-5. **Extract Authorization Rules:** Identify standard SAP authorization objects mentioned or specific Data Control Language (DCL) requirements (e.g., restricting by Company Code).
+5. **Clean Core & Cloud Extensibility Check (CRITICAL):**
+   - Scan the FS for standard SAP tables (e.g., ACDOCA, BSEG, MSEG, MARA) or classic unreleased APIs (e.g., standard Function Modules, BAPIs).
+   - Flag them as violations of Clean Core in S/4HANA Cloud.
+   - Propose replacements using **Released Standard CDS Views** (e.g., `I_AccountingDocumentJournal`, `I_MaterialDocumentItem_2`), **Released BTP APIs**, or standard BAdIs/EML patterns.
+6. **Extract Authorization Rules:** Identify standard SAP authorization objects mentioned or specific Data Control Language (DCL) requirements (e.g., restricting by Company Code).
 
 # EXPECTED OUTPUT
 Provide a clear breakdown of the business logic:
@@ -24,4 +28,5 @@ Provide a clear breakdown of the business logic:
 - **Derived/Calculated Fields (CDS):** [List logic suitable for CDS]
 - **Complex Logic (Virtual Elements/ABAP):** [List logic requiring ABAP classes]
 - **Actions/Determinations:** [List actions or write "None"]
+- **Clean Core & Cloud Extensibility Check:** [List any violations of Clean Core in the FS and suggest released standard CDS views/APIs replacements]
 - **Authorization Check:** [Specify auth objects or PFCG requirements]
