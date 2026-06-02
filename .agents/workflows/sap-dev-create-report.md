@@ -80,11 +80,11 @@ Action: (Skip if Read-only). Generate the ABAP Global Class (CLASS lhc_...). Use
 
 Execute: Lint -> Push -> Activate.
 
-Step 5: Projection View (ZC_...)
+Step 5: Projection View (ZC_...) & UI Annotations
 
 Required Skill: [Skill: CDS View Entities]
 
-Action: Create DEFINE ROOT VIEW ENTITY ... AS PROJECTION ON. Include @Search and @EndUserText. Do NOT include UI annotations.
+Action: Create DEFINE ROOT VIEW ENTITY ... AS PROJECTION ON. Include @Search, @EndUserText, and all necessary UI annotations (@UI.lineItem, @UI.selectionField, @UI.presentationVariant) directly in the Projection View. Do NOT create a separate Metadata Extension (MDE) since MCP does not support it.
 
 Execute: Lint -> Push -> Activate.
 
@@ -96,21 +96,13 @@ Action: (Skip if no Base BDEF). Create the Projection BDEF.
 
 Execute: Lint -> Push -> Activate.
 
-Step 7: Metadata Extension (MDE)
-
-Required Skill: [Skill: CDS View Entities]
-
-Action: Create MDE (ANNOTATE VIEW...). Add UI annotations (@UI.lineItem, @UI.selectionField, @UI.presentationVariant) for Fiori Elements.
-
-Execute: Lint -> Push -> Activate.
-
-Step 8: Service Definition & Binding
+Step 7: Service Definition & Binding
 
 Required Skill: [Skill: OData Service Development]
 
 Action:
-8.1 Create Service Definition (DEFINE SERVICE).
-8.2 Recommend/Create Service Binding (OData V4 - UI).
+7.1 Create Service Definition (DEFINE SERVICE).
+7.2 Recommend/Create Service Binding (OData V4 - UI).
 
 Execute: Lint -> Push -> Activate.
 
