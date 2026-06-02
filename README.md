@@ -21,7 +21,8 @@ abap_workspaces/
 │   │   │   ├── fs-data-model-extractor/
 │   │   │   ├── fs-fiori-ui-elements-mapper/
 │   │   │   ├── fs-logic-behavior-translator/
-│   │   │   └── fs-integration-api-analyzer/
+│   │   │   ├── fs-integration-api-analyzer/
+│   │   │   └── fs-vision-extractor/
 │   │   ├── Developer/              # 💻 Nhóm kỹ năng Phát triển & Kỹ thuật ABAP Cloud
 │   │   │   ├── abap/ , abap-cloud/ , clean-abap/ , naming-convension/ ...
 │   │   │   └── rap/ , cds-view-entities/ , odata/ , authorization-iam/ ...
