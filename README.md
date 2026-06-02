@@ -30,7 +30,11 @@ abap_workspaces/
 │   └── workflows/                  # ⚙️ Các kịch bản tự động hóa quy trình nghiệp vụ
 │       ├── sap-dev-analytic-fs.md  # Quy trình phân tích FS sang Technical Spec
 │       └── sap-dev-create-report.md# Quy trình tự động sinh báo cáo ABAP RAP
-├── SAPER_2025_PM_FS_Sổ-chi-tiết-...docx # 📄 File tài liệu nghiệp vụ mẫu đầu vào (FS)
+├── fs_docs/                        # 📄 Thư mục chứa tài liệu đặc tả nghiệp vụ đầu vào (FS)
+├── generated_docs/                 # 📂 Thư mục chứa các tài liệu kỹ thuật được sinh ra tự động
+│   ├── technical_specifications/   # Bản đặc tả kỹ thuật (Technical Specs - TS_*.md)
+│   ├── scratchpads/                # Các bản thảo kiến trúc nháp (Scratchpads - scratchpad_*.md)
+│   └── walkthroughs/               # Hướng dẫn triển khai, kiểm thử & task checklist
 └── README.md                       # 📖 Tài liệu hướng dẫn sử dụng (File này)
 ```
 
@@ -58,11 +62,11 @@ Sử dụng các Slash Command được thiết kế riêng cho các quy trình 
 ## 🚀 Hướng dẫn Bắt đầu Nhanh
 
 ### Bước 1: Chuẩn bị tài liệu đầu vào
-Đảm bảo bạn đã đặt tài liệu Functional Specification (FS) vào thư mục gốc của workspace (ví dụ: file Word `.docx` hoặc Text hiện tại).
+Đảm bảo bạn đã đặt tài liệu Functional Specification (FS) vào thư mục `fs_docs/` của workspace (ví dụ: file Word `.docx` hoặc Text hiện tại).
 
 ### Bước 2: Kích hoạt quy trình Phân tích FS
 Hãy gửi yêu cầu phân tích cho Agent kèm đường dẫn tài liệu. 
-* *Ví dụ:* `"Hãy kích hoạt workflow /sap-dev-analytic-fs để phân tích tài liệu FS [SAPER_2025_PM_FS_Sổ-chi-tiết-vật-liệu--sản-phẩm--hàng-hóa_V0_7---Copy.docx](./SAPER_2025_PM_FS_S%E1%BB%95-chi-ti%E1%BA%BFt-v%E1%BA%ADt-li%E1%BB%87u--s%E1%BA%A3n-ph%E1%BA%A9m--h%C3%A0ng-h%C3%B3a_V0_7---Copy.docx) thuộc Package Z_INVENTORY_REPORT"`
+* *Ví dụ:* `"Hãy kích hoạt workflow /sap-dev-analytic-fs để phân tích tài liệu FS [SAPER_2025_PM_FS_Sổ-chi-tiết-vật-liệu--sản-phẩm--hàng-hóa_V0_7---Copy.docx](./fs_docs/SAPER_2025_PM_FS_S%E1%BB%95-chi-ti%E1%BA%BFt-v%E1%BA%ADt-li%E1%BB%87u--s%E1%BA%A3n-ph%E1%BA%A9m--h%C3%A0ng-h%C3%B3a_V0_7---Copy.docx) thuộc Package Z_INVENTORY_REPORT"`
 
 ### Bước 3: Đánh giá Technical Spec & Sinh Code
 Sau khi Agent phân tích xong và trả ra cấu trúc Technical Specification chuẩn, bạn hãy kiểm tra lại. Sau đó, kích hoạt tiếp lệnh `/sap-dev-create-report` để Agent tự động sinh code ABAP RAP toàn diện cho bạn.

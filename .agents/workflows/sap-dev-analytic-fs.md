@@ -22,7 +22,7 @@ Analyze the FS sequentially using your specific analytical skills:
 Your final output MUST follow this exact template to act as the direct input for the "RAP Code Generation Workflow". Do not add introductory or concluding remarks outside this template.
 
 Save the output as a Markdown file (.md) directly under the following path:
-`/Users/duckpower/IDE WorkSpaces/abap_workspaces/generated_docs/technical_specifications/TS_[ReportName].md`
+`generated_docs/technical_specifications/TS_[ReportName].md` (relative to the workspace root)
 Replace `[ReportName]` with the actual descriptive name of the report in CamelCase.
 
 
