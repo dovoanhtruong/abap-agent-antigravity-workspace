@@ -67,13 +67,14 @@ These skills modify the agent's behavior to optimize communication, planning, an
 | **Grill Me** | Expert Interviewer | [SKILL.md](./skills/Productivity/grill-me/SKILL.md) | Asks targeted questions to clarify requirements before starting work. | `grill me`, `clarify`, `interview`, `hỏi tôi`, `làm rõ` |
 | **Caveman** | Concise Communicator | [SKILL.md](./skills/Productivity/caveman/SKILL.md) | Provides ultra-terse, fluff-free technical responses. | `caveman`, `short`, `terse`, `ngắn gọn`, `không rườm rà` |
 | **Handoff** | Session Manager | [SKILL.md](./skills/Productivity/handoff/SKILL.md) | Summarizes context and progress for seamless transition between sessions. | `handoff`, `summary`, `transition`, `chuyển giao`, `tổng kết` |
+| **Document Markdown Converter** | Document Pre-processor | [SKILL.md](./skills/Productivity/document-markdown-converter/SKILL.md) | Uses MarkItDown CLI to parse binary documents (PDF/DOCX) into token-efficient Markdown before analysis. | `markitdown`, `convert document`, `parse document`, `tiền xử lý tài liệu`, `pdf`, `docx` |
 | **Scratchpad** | Structured Thinker | [SKILL.md](./skills/Productivity/scratchpad/SKILL.md) | Uses a working document to draft, plan, and track complex changes. | `scratchpad`, `draft`, `plan`, `nháp`, `lên kế hoạch` |
 
 ---
 
 ## 🔀 WORKFLOW ROUTING INTEGRATION
 The workflows inside `.agents/workflows/` invoke these skills dynamically:
-- **/sap-dev-analytic-fs**: Sequentially loads `Data Model Extractor`, `Find Released CDS View` (to validate released clean-core sources), `Fiori UI Elements Mapper`, and `ABAP Logic & Behavior Translator` to generate Technical Specs from an FS.
+- **/sap-dev-analytic-fs**: Sequentially loads `Document Markdown Converter` (to pre-process binary documents), `Data Model Extractor`, `Find Released CDS View` (to validate released clean-core sources), `Fiori UI Elements Mapper`, and `ABAP Logic & Behavior Translator` to generate Technical Specs from an FS.
 - **/sap-dev-create-report**: Steps reference `Find Released CDS View` (to verify data sources before coding), `CDS View Entities`, `Authorization & IAM`, `RAP Model`, `Modern ABAP Syntax`, `OData Service Development`, and `Clean ABAP` to write and deploy code.
 - **/sap-dev-bug-fix**: Integrates `Grill Me`, `Scratchpad`, `Data Model Extractor` and `ABAP Logic & Behavior Translator` for root cause analysis with mock data, enforces cross-impact checks, and applies code fixes with `Modern ABAP Syntax`, `OO Design Patterns`, `ABAP Unit Testing` and `Clean ABAP` to ensure regression-free deployment in DEV.
 - **/sap-dev-api-inbound**: Integrates `Scratchpad`, `ABAP Cloud / Clean Core`, `Modern ABAP Syntax`, `OO Design Patterns` and `Clean ABAP` to design, implement, and validate an INBOUND API integration adhering to the `Z_API_FWK` framework.
