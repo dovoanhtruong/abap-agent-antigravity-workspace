@@ -95,49 +95,42 @@ Example: if the user asks for "Zalo/mobile number of customer" and expects a com
 
 ## Step 3: Search Released DDLS Objects
 
-Use `mcp-sap-docs` release-state search:
+Use the `@mcp:sap-cds-kb` server to search for complete, packaged CDS views:
 
 ```
-mcp__abap_docs.sap_search_objects(
+mcp_sap-cds-kb_search_cds(
   query="<business term or object stem>",
-  system_type="public_cloud",
-  clean_core_level="A",
-  object_type="DDLS",
-  state="released",
-  limit=25
+  module="<optional module code e.g. SD, MM, FI>",
+  bo="<optional business object e.g. salesorder>",
+  limit=10
 )
 ```
 
 If the result set is too broad:
-- Add `app_component` when known.
+- Add `module` or `bo` to filter the results.
 - Search exact stems such as `I_SALESORDER` instead of broad phrases.
-- Page with `offset` only when the first page has plausible partial matches.
 
 If no results are found:
 - Try exact SAP naming stems from the business domain.
-- Try a neighboring application component.
-- Search documentation with `mcp__abap_docs.search` for the business object name plus "CDS view released API".
-- Report that no released DDLS candidate was found under the chosen target system and Clean Core level before widening to level `B`.
+- Try a neighboring application component module.
+- Search documentation with `mcp_mcp-sap-docs-local_search` for the business object name plus "CDS view released API".
+- Report that no released DDLS candidate was found before widening criteria.
 
 ## Step 4: Verify Each Candidate
 
-For each plausible candidate, first verify release-state details:
+For each plausible candidate, retrieve full CDS view details (metadata, fields, associations, source) using the `@mcp:sap-cds-kb` server:
 
 ```
-mcp__abap_docs.sap_get_object_details(
-  object_type="DDLS",
-  object_name="<candidate>",
-  system_type="public_cloud",
-  target_clean_core_level="A"
+mcp_sap-cds-kb_get_cds_view(
+  name="<candidate>"
 )
 ```
 
 Reject or downgrade candidates when:
-- `found` is false
-- `state` is not `released`
-- `cleanCoreLevel` is not `A` for BTP/public cloud targets
-- The application component is clearly outside the user's domain
-- The object has a successor and the successor is a better fit
+- The view is not found.
+- The state or metadata indicates it is not released for your target environment.
+- The application component is clearly outside the user's domain.
+- The object has a successor and the successor is a better fit.
 
 Then verify usability in the actual SAP system:
 

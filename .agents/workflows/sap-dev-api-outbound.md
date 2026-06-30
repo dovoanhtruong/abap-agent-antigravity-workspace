@@ -22,8 +22,8 @@ All outbound calls MUST go through `ZCL_API_FWK=>execute_api`.
 Please execute the following sequence:
 
 Step 0: Planning & Drafting
-Required Skill: [Skill: Scratchpad]
-Action: Draft the Outbound API architecture. Analyze trigger points, data extraction logic, payload structure, and response handling.
+Required Skill: [Skill: Scratchpad], [Skill: SAP Integration & API Analyzer]
+Action: Use [Skill: SAP Integration & API Analyzer] to analyze the requirements and check SAP Accelerator Hub for existing standard APIs. If a custom API is required, draft the Outbound API architecture. Analyze trigger points, data extraction logic, payload structure, and response handling.
 Save the draft to `generated_docs/scratchpads/scratchpad_outbound_[API_Name].md`.
 
 Step 1: Create Data Dictionary Objects

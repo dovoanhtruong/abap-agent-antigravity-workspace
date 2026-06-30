@@ -12,6 +12,7 @@ When invoked to analyze integration and API requirements from an FS, execute the
 1. **Identify Integration Patterns:**
    - Determine the integration pattern specified in the FS: Synchronous (REST/OData HTTP), Asynchronous (Events, Message Queue, Event Mesh), or File-based (sFTP, Application Server files).
 2. **Extract API Specifications (OData / REST):**
+   - **Pre-check**: Use `mcp_mcp-sap-docs-local_sap_accelerator_hub_search` and `mcp_mcp-sap-docs-local_sap_accelerator_hub_fetch` to search the SAP Accelerator Hub. Determine if a standard SAP API already exists for the requirement before assuming a custom API must be built.
    - Identify proposed OData Service definitions (Service Definition, Service Binding V2 vs V4).
    - List all Entities, Properties, Key fields, and Navigation Properties mentioned in the FS.
    - Check if the entity relationship designs (Associations/Compositions) are clean.

@@ -22,8 +22,8 @@ All errors MUST be caught using `CX_ROOT` or `ZCX_API_FWK` and returned explicit
 Please execute the following sequence:
 
 Step 0: Planning & Drafting
-Required Skill: [Skill: Scratchpad]
-Action: Draft the Inbound API architecture. Analyze the JSON/XML payload and map it to ABAP Dictionary structures. Define the HTTP logic, success/error handling criteria. 
+Required Skill: [Skill: Scratchpad], [Skill: SAP Integration & API Analyzer]
+Action: Use [Skill: SAP Integration & API Analyzer] to analyze the requirements and check SAP Accelerator Hub for existing standard APIs. If a custom API is required, draft the Inbound API architecture. Analyze the JSON/XML payload and map it to ABAP Dictionary structures. Define the HTTP logic, success/error handling criteria. 
 Save the draft to `generated_docs/scratchpads/scratchpad_inbound_[API_Name].md`.
 
 Step 1: Create Data Dictionary Objects
