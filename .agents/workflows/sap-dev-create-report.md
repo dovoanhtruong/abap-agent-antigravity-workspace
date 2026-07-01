@@ -20,6 +20,8 @@ Additional Requirements: [Các yêu cầu thêm]
 [EXECUTION PROTOCOL - CRITICAL]
 After generating the ABAP code for each step, you MUST follow this precise lifecycle:
 
+0. TRANSPORT REQUEST (TR) BINDING: You MUST extract the TR from the [INPUT DATA] section. Every single time you call a tool to edit or create an SAP object (e.g., via MCP tool `SAP` action `edit` or `create`), you MUST explicitly include the parameter `transport: "<TR_NUMBER>"` or `corrNr: "<TR_NUMBER>"` to prevent the system from auto-generating an unwanted TR.
+
 GENERATE: Use the specific abap-skills mentioned in each step to draft the code.
 
 VALIDATE (LINTING): Before deploying, automatically trigger the [Skill: ABAP/abaplint] or [Skill: Clean ABAP] to check the generated source code for syntax, Clean Core compliance, and best practices. Fix any Critical/Major issues.
@@ -80,13 +82,14 @@ Action: (Skip if Read-only). Generate the ABAP Global Class (CLASS lhc_...). Use
 
 Execute: Lint -> Push -> Activate.
 
-Step 5: Projection View (ZC_...) & UI Annotations
+Step 5: Projection View (ZC_...) & Metadata Extension (MDE)
 
 Required Skill: [Skill: CDS View Entities]
 
-Action: Create DEFINE ROOT VIEW ENTITY ... AS PROJECTION ON. Include @Search, @EndUserText, and all necessary UI annotations (@UI.lineItem, @UI.selectionField, @UI.presentationVariant) directly in the Projection View. Do NOT create a separate Metadata Extension (MDE) since MCP does not support it.
+Action: Create DEFINE ROOT VIEW ENTITY ... AS PROJECTION ON. Include @Search, @EndUserText, and @Metadata.allowExtensions: true.
+CRITICAL: Do NOT put @UI annotations inside the Projection View. Instead, generate the full Metadata Extension (MDE) source code and save it as an artifact file at `generated_docs/metadata_extensions/ZMD_[ReportName].md` (relative to the workspace root). Explicitly instruct the user to manually create a new Metadata Extension object in Eclipse ADT and paste this code, because the MCP tool cannot directly create DDLX objects on the SAP server.
 
-Execute: Lint -> Push -> Activate.
+Execute: Lint -> Push -> Activate (for the Projection View only).
 
 Step 6: Projection Behavior
 

@@ -15,11 +15,13 @@ Analyze the FS sequentially using your specific analytical skills:
 0. DRAFTING: Use [Skill: Scratchpad] to draft and validate your findings before outputting the final specification.
 0.1. DOCUMENT PRE-PROCESSING: Use [Skill: Document Markdown Converter] to convert binary FS files (PDF, DOCX, XLSX) located in `fs_docs/` into Markdown using MarkItDown CLI. Save it to `generated_docs/scratchpads/fs_markdown.md`. READ this Markdown file for all subsequent analysis steps instead of the original file.
 0.2. IMAGE PROCESSING: If the FS contains images (e.g., UI mockups, flowcharts), use `markitdown-ocr` or AI Vision to extract and transcribe their content.
+0.3. DATA COMPLETENESS CHECK: After pre-processing, review the extracted text. If the FS explicitly refers to fields, tables, or requirements that are contained within an image, an external link (e.g., Google Drive), or a complex table that failed to convert properly, you MUST STOP and explicitly ask the user to provide that missing information (e.g., by uploading the image or pasting the text) BEFORE proceeding to draft the TS. Do not guess or use placeholder ranges (like "Fields 1 to 39").
 1. DATA MODELING ANALYSIS: Use [Skill: SAP Data Model Extractor] to scan the pre-processed FS for standard/custom tables, CDS Views (e.g., I_AccountingDocument...), join conditions, cardinalities, global parameters, and required output fields.
    1.1. RELEASED CDS VALIDATION: Use [Skill: Find Released CDS View] to verify that all identified data sources (tables, CDS views) are released clean-core APIs (Clean Core Level A, S/4HANA Cloud Public). For any unreleased or internal views/tables found in the FS, search and recommend the best released CDS view replacement that matches the required business grain and field coverage.
 2. UI/UX ANALYSIS: Use [Skill: Fiori UI Elements Mapper] to analyze the report layout. Identify which fields are mandatory filters (Selection Fields) and the exact order/properties of columns (Line Items). Identify sum/subtotal/sorting requirements.
 3. BUSINESS LOGIC EXTRACTION: Use [Skill: ABAP Logic & Behavior Translator] to identify complex processing rules (e.g., opening/closing balances, fallback chains for descriptions, positive/negative quantity reversals, unit/currency mapping). Determine if these should be handled via CDS Logic (Case/When) or ABAP Virtual Elements/Behavior classes.
 4. AUTHORIZATION & SECURITY: Identify if the FS mentions specific Data Control Language (DCL) requirements or standard PFCG auth objects.
+5. TS VERIFICATION: Cross-check the drafted Technical Specification against the original FS. You MUST verify that 100% of the fields specified in the FS are present (with their exact names, not placeholders), and that every single field has its data mapping/extraction logic fully and correctly documented.
 
 [OUTPUT FORMAT - CRITICAL]
 Your final output MUST follow this exact template to act as the direct input for the `/sap-dev-create-report` workflow, and it will also serve as the official Technical Specification (TS) document for the Report. Do not add introductory or concluding remarks outside this template.
@@ -42,12 +44,12 @@ Report Description / Requirements:
 - Joins & Conditions: [Specify ON conditions, e.g., A LEFT OUTER JOIN B ON A.Field = B.Field]
 - Key Fields: [List key fields]
 - Hardcoded Filters: [List mandatory filters, e.g., Ledger = '0L']
-- Output Fields: [List crucial fields needed for the report]
+- Output Fields: [MANDATORY: List 100% of all fields specified in the FS. For EACH field, you MUST clearly and completely describe the exact logic, source view/table, join conditions, or derivation rules required to extract its data.]
 
 *UI & Layout (Fiori Elements):*
 
 - Selection Fields (Filters): [List fields used as search parameters, explicitly mark mandatory ones]
-- Line Items: [List fields to display in the Grid/List Report in their correct sequence]
+- Line Items: [List 100% of the fields to display in the Grid/List Report in their correct sequence, detailing how each is populated based on the output fields logic]
 - Default Sorting/Grouping: [List specific default sort order]
 
 *Business Logic & Behavior:*

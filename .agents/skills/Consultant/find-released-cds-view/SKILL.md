@@ -95,14 +95,18 @@ Example: if the user asks for "Zalo/mobile number of customer" and expects a com
 
 ## Step 3: Search Released DDLS Objects
 
-Use the `@mcp:sap-cds-kb` server to search for complete, packaged CDS views:
+Use the `doc_sap_cds_kb` server to search for complete, packaged CDS views:
 
-```
-mcp_sap-cds-kb_search_cds(
-  query="<business term or object stem>",
-  module="<optional module code e.g. SD, MM, FI>",
-  bo="<optional business object e.g. salesorder>",
-  limit=10
+```json
+call_mcp_tool(
+  ServerName="doc_sap_cds_kb",
+  ToolName="search_cds",
+  Arguments={
+    "query": "<business term or object stem>",
+    "module": "<optional module code e.g. SD, MM, FI>",
+    "bo": "<optional business object e.g. salesorder>",
+    "limit": 10
+  }
 )
 ```
 
@@ -113,16 +117,20 @@ If the result set is too broad:
 If no results are found:
 - Try exact SAP naming stems from the business domain.
 - Try a neighboring application component module.
-- Search documentation with `mcp_mcp-sap-docs-local_search` for the business object name plus "CDS view released API".
+- Search documentation using `call_mcp_tool` with ServerName `doc_sap_extension` and ToolName `search` for the business object name plus "CDS view released API".
 - Report that no released DDLS candidate was found before widening criteria.
 
 ## Step 4: Verify Each Candidate
 
-For each plausible candidate, retrieve full CDS view details (metadata, fields, associations, source) using the `@mcp:sap-cds-kb` server:
+For each plausible candidate, retrieve full CDS view details (metadata, fields, associations, source) using the `doc_sap_cds_kb` server:
 
-```
-mcp_sap-cds-kb_get_cds_view(
-  name="<candidate>"
+```json
+call_mcp_tool(
+  ServerName="doc_sap_cds_kb",
+  ToolName="get_cds_view",
+  Arguments={
+    "name": "<candidate>"
+  }
 )
 ```
 
