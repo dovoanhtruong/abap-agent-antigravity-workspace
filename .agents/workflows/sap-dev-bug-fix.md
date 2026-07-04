@@ -46,4 +46,4 @@ description: Sử dụng workflow này khi cần chẩn đoán và sửa lỗi (
 
 ## Output Format
 
-Report in `[Skill: Caveman]` style (short, evidence-based). Save a Fix Report to `artifacts/walkthroughs/walkthrough_bugfix_[ObjectName].md` containing: the root cause, the approved fix applied, the ABAP Unit Test evidence (not "should work"), the Cross-Impact Report, and the exact list of objects to activate.
+Report chat progress in `[Skill: Caveman]` style (short, evidence-based) — narration only. Save a Fix Report to `artifacts/walkthroughs/walkthrough_bugfix_[ObjectName].md` in full detail, NOT caveman-compressed (`sap-dev-rule.md` §10): the root cause, the approved fix applied, the ABAP Unit Test evidence (not "should work"), the Cross-Impact Report, and the exact list of objects to activate.

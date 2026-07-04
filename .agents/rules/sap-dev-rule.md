@@ -3,46 +3,36 @@ trigger: always_on
 ---
 # SAP CLOUD DEV RULES (STRICT)
 
-**1. SKILL ROUTING:** MUST read `SKILLS_ROUTER.md` before any task to dynamically load required skills.
+**1. SKILL ROUTING:** Read `SKILLS_ROUTER.md` before any task; load only the matched skill(s).
 **2. SCOPE & SAFETY:**
-- **Consent First:** Ask explicitly before any CUD operations.
-- **Custom Only:** Modify ONLY Z/Y objects. NEVER touch Standard Objects.
-- **Strict Scope:** Touch ONLY objects in the current task scope. NO unintended side-effects.
-- **Collision Check:** Verify object names globally (Z*) before creation. If exists, propose new name and ask for approval.
-- **TR & Package:** Required for all new/modified objects. Ask if missing.
-- **Read-Only Data:** Business data is READ-ONLY unless explicitly testing RAP BOs.
+- Consent before any CUD op. Z/Y custom objects only — never touch Standard objects. Stay strictly in task scope, no side-effects.
+- Check names globally before creating; if taken, propose a new name and ask.
+- TR + Package mandatory for every new/modified object — ask if missing.
+- Business data is read-only unless explicitly testing a RAP BO.
 **3. CODE STANDARDS:**
-- **Modern ABAP & OOP:** Enforce Modern ABAP (VALUE, COND, REDUCE) and GoF Patterns. Reject legacy procedural code.
-- **Clean Core (Read):** CDS Views ONLY. NEVER SELECT from physical tables.
-- **Clean Core (Write):** ABAP EML or Released APIs ONLY. NEVER direct INSERT/UPDATE.
+- Modern ABAP (VALUE/COND/REDUCE) + GoF patterns; reject legacy procedural code.
+- Read via CDS Views only, never physical tables. Write via EML or Released APIs only, never direct INSERT/UPDATE.
 **4. WORKFLOW & FILES:**
-- **Scratchpad:** MUST draft complex architecture in a scratchpad first.
-- **File Organizer (all under one `artifacts/` root):** 
-  - FS inputs -> `artifacts/fs_docs/`
-  - Output TS -> `artifacts/technical_specifications/`
-  - Scratchpads -> `artifacts/scratchpads/`
-  - Walkthroughs -> `artifacts/walkthroughs/`
-  - Metadata Extensions -> `artifacts/metadata_extensions/`
-  - System Analysis Reports -> `artifacts/system_analysis/`
-  - *NEVER output to `.agents/` or root.*
+- Draft complex architecture in a scratchpad first.
+- All outputs under `artifacts/` (never `.agents/` or root): FS inputs → `fs_docs/` · TS → `technical_specifications/` · Scratchpads → `scratchpads/` · Walkthroughs → `walkthroughs/` · Metadata Ext → `metadata_extensions/` · System Analysis → `system_analysis/`.
 **5. VALIDATION & ERRORS:**
-- **Activation:** Remind/trigger activation. On failure, extract exact SAP error (DO NOT guess).
-- **Final Audit:** Post-CUD, perform boundary check: verify no external mutations, syntax-error-free, properly activated, and isolated.
+- Trigger activation; on failure extract the exact SAP error, don't guess the cause.
+- Post-CUD final check: no mutation outside scope, no syntax errors, activated, isolated.
 **6. IRON LAWS (NO EXCEPTIONS):**
-- **No TS handoff without verification pass:** A Technical Specification is only valid input for `/sap-dev-create-report` after it has passed the FS-analytic Verify Loop (PASS, or FAIL explicitly accepted by the user in writing).
-- **No object creation without TS coverage:** `/sap-dev-create-report` MUST NOT create any object or logic absent from the TS's Coding Implementation Plan. Missing info → STOP, do not improvise; go back to the user or to `/sap-dev-fs-analytic`.
-- **No activation-only claims:** "Activated" is not "correct." Every completion report must state both separately.
+- No TS handoff without a passed Verify Loop (or a FAIL the user explicitly accepted in writing).
+- No object/logic creation absent from the TS's Coding Implementation Plan — missing info means STOP, don't improvise; go back to the user or `/sap-dev-fs-analytic`.
+- No activation-only claims — see §8 (Activated ≠ Correct).
 **7. RED FLAGS — STOP if you catch yourself thinking:**
-- "This FS is simple, skip some skills/steps" → Still run all of them; simple just means each step is fast, not skipped.
-- "TS is missing a field or two, I'll infer it while coding" → This is exactly how wrong report logic happens. Go back and patch the TS first.
-- "It activated, so it's probably correct" → Runtime logic is unverified until the Verify step actually runs.
-- "Let me try one more fix" (after ≥3 attempts) → Stop. This signals an architecture/TS problem, not a small bug. Ask the user.
-**8. REPORTING LANGUAGE:** Never say "should work / probably fine / likely correct" when claiming completion. Every "Activated/Passed/Correct" claim must cite the actual evidence (command run, output observed).
-**9. MCP TOOL USAGE:** Each skill calls whichever MCP server/tool its function needs; the agent resolves and dispatches these itself. Before relying on an MCP server/tool name for the first time in a session, verify it actually exists — never copy another skill's tool name/syntax without verifying it applies here.
-**10. TOKEN EFFICIENCY (use the Productivity skills deliberately):**
-- Progress/log output (validation logs, activation status, step start/end) uses **[Skill: Caveman]** — short, evidence-first, no restating what the ledger already shows.
-- Never re-print an entire TS or scratchpad in a response — quote only the section needed for the current step; reference the file path for the rest.
-- Reference other skills as `[Skill: X]` rather than re-embedding their content.
-- **[Skill: Grill Me]** stays to 1-3 targeted questions per round, not open-ended interviews.
-- **[Skill: Handoff]** is mandatory before a session is likely to be compacted/interrupted mid-workflow, so the next session reads the ledger + handoff instead of reloading full history.
-**11. EVIDENCE FLOOR FOR USER-PROVIDED VERIFICATION:** When a workflow asks the user to manually test something and report back, a bare confirmation with no concrete data ("looks fine", "ok", "works") is NOT sufficient to mark a verify gate PASS. Ask again for the specific evidence the step requires (actual response payload, actual field values, screenshot, etc.) before recording a result. If the user insists on proceeding without evidence, record the gate as "PASS — unverified, user-accepted" (never as a plain PASS) so the residual risk stays visible in the walkthrough.
+- "Simple FS, skip a step" → still run every step, just faster.
+- "Missing a field, I'll infer it while coding" → patch the TS first, don't improvise.
+- "It activated, so it's probably correct" → unverified until the Verify step actually runs.
+- "One more fix" after ≥3 attempts → stop, it's an architecture/TS problem — ask the user.
+**8. REPORTING LANGUAGE:** Never say "should work / probably fine / likely correct." Every "Activated/Passed/Correct" claim needs cited evidence (command run, output observed) — Activated ≠ Correct, state both separately.
+**9. MCP TOOL USAGE:** Skills dispatch whatever MCP server/tool their function needs. Verify a tool actually exists before its first use in a session — never assume another skill's tool name/syntax applies here.
+**10. TOKEN EFFICIENCY:**
+- Chat narration (progress, status, completion summaries) uses **[Skill: Caveman]** — scope and exceptions are defined in `caveman/SKILL.md` (never applies to code, saved deliverable files, or security/consent warnings).
+- Never re-print a full TS/scratchpad — quote only the section needed, reference the path for the rest.
+- Reference other skills as `[Skill: X]`, don't re-embed their content.
+- `[Skill: Grill Me]`: 1-3 targeted questions per round, not open interviews.
+- `[Skill: Handoff]`: mandatory before a session is likely to be compacted/interrupted mid-workflow.
+**11. EVIDENCE FLOOR FOR USER VERIFICATION:** A bare "looks fine / ok / works" is not a PASS — ask again for the actual evidence the step requires (payload, field values, screenshot) before recording a result. If the user insists without it, record "PASS — unverified, user-accepted", never a plain PASS.

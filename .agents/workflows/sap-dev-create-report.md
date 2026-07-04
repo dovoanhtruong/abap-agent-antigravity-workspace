@@ -67,7 +67,7 @@ Per step: GENERATE (draft per the row's spec) → check the name against [Skill:
 3.0 Save `artifacts/walkthroughs/walkthrough_[ReportName].md`: what was built (object list from the ledger, all DONE), what was verified and how (cite the actual filter values and results from Phase 2 — never "should work"), and any known risks/manual steps outstanding (e.g. "Metadata Extension pending manual creation in ADT"). If a UI Service Binding (Step 7) was created, optionally use [Skill: SAP Fiori Apps Reference] to generate the Fiori Launchpad URL from its Semantic Object/Action and include it in the walkthrough.
 
 [OUTPUT FORMAT]
-For each Phase-1 step, report in [Skill: Caveman] style (short, evidence-based, no filler):
+For each Phase-1 step, report in the chat using [Skill: Caveman] style for the narration only (short, evidence-based, no filler) — the source code and log content below stay verbatim, never compressed (`sap-dev-rule.md` §10):
 - The Object Name & Applied Skill (e.g., `ZC_MY_REPORT` — [Skill: CDS View Entities]).
-- The exact validated ABAP/CDS source code (markdown).
-- SYSTEM EXECUTION RESULT: Validation Log (abaplint/Clean ABAP), Activation Status (Activated/Failed/Activated with Warnings), Auto-Correction Log if any.
+- The exact validated ABAP/CDS source code (markdown, verbatim).
+- SYSTEM EXECUTION RESULT: Validation Log (abaplint/Clean ABAP), Activation Status (Activated/Failed/Activated with Warnings), Auto-Correction Log if any — verbatim.

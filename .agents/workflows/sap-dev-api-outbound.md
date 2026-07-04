@@ -48,4 +48,4 @@ Step 3 — Framework Configuration: instruct the user to configure the Outbound 
 Save `artifacts/walkthroughs/walkthrough_outbound_[API_Name].md`: objects built, the actual Phase 2 call evidence (payload sent + target response — never "should work"), and any outstanding risks.
 
 [OUTPUT FORMAT]
-Per step, in [Skill: Caveman] style (short, evidence-based): Object Name & Applied Skill (e.g., `ZR_MY_OUTBOUND` — [Skill: RAP]); the validated ABAP source code (markdown); SYSTEM EXECUTION RESULT (Validation Log, Activation Status).
+Per step, narrate in [Skill: Caveman] style (short, evidence-based); the source code and results below stay verbatim, never compressed (`sap-dev-rule.md` §10): Object Name & Applied Skill (e.g., `ZR_MY_OUTBOUND` — [Skill: RAP]); the validated ABAP source code (markdown, verbatim); SYSTEM EXECUTION RESULT (Validation Log, Activation Status).

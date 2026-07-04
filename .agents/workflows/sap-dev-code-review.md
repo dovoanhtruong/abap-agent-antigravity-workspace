@@ -82,5 +82,5 @@ Format the document exactly as follows:
 - Gợi ý sử dụng các class chuẩn SAP.
 
 [OUTPUT FORMAT]
-- Progress updates after analyzing the code, in `[Skill: Caveman]` style — short, evidence-based (this is read-only/advisory; avoid "chắc là/should be" language per `sap-dev-rule.md` §8).
+- All chat progress narration throughout this workflow uses `[Skill: Caveman]` style per `sap-dev-rule.md` §10 — short, evidence-based, narration only (the saved report content and any code excerpts stay verbatim). This is read-only/advisory; avoid "chắc là/should be" language per `sap-dev-rule.md` §8.
 - Provide the clickable link to the generated Code Review Report.

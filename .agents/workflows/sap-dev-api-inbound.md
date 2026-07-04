@@ -52,4 +52,4 @@ Step 3 — Framework Configuration: instruct the user to configure the API via F
 Save `artifacts/walkthroughs/walkthrough_inbound_[API_Name].md`: objects built, unit test results, the actual Phase 3 call evidence (payload + response — never "should work"), and any outstanding risks.
 
 [OUTPUT FORMAT]
-Per step, in [Skill: Caveman] style (short, evidence-based): Object Name & Applied Skill (e.g., `ZCL_IB_CREATE_SO` — [Skill: Clean ABAP]); the validated ABAP source code (markdown); SYSTEM EXECUTION RESULT (Validation Log, Activation Status).
+Per step, narrate in [Skill: Caveman] style (short, evidence-based); the source code and results below stay verbatim, never compressed (`sap-dev-rule.md` §10): Object Name & Applied Skill (e.g., `ZCL_IB_CREATE_SO` — [Skill: Clean ABAP]); the validated ABAP source code (markdown, verbatim); SYSTEM EXECUTION RESULT (Validation Log, Activation Status).

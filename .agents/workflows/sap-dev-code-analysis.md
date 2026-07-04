@@ -70,5 +70,5 @@ Format the document exactly as follows:
 - Những điểm cần lưu ý khi bảo trì hoặc mở rộng (Extensibility) trong tương lai.
 
 [OUTPUT FORMAT]
-- Report status after completing Step 0, Step 1, and Step 2 in `[Skill: Caveman]` style — short, evidence-based (this is a read-only analysis; still avoid "chắc là/should be" language per `sap-dev-rule.md` §8, cite what was actually read).
+- All chat progress narration throughout this workflow uses `[Skill: Caveman]` style per `sap-dev-rule.md` §10 — short, evidence-based, narration only (the saved report content and any code excerpts stay verbatim). This is a read-only analysis; still avoid "chắc là/should be" language per `sap-dev-rule.md` §8, cite what was actually read.
 - Provide the clickable link to the generated Final Technical Report.
