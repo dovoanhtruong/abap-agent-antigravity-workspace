@@ -1,6 +1,6 @@
 ---
-name: sap-fiori-url-generator
-description: Generate SAP Fiori Launchpad URLs from app names. Uses the `@mcp:mcp-sap-docs-local` server to search for Fiori apps and extract Semantic Object and Action to construct proper FLP URLs with required parameters like sap-client and sap-language.
+name: sap-fiori-apps-reference
+description: Generate SAP Fiori Launchpad URLs from app names. Searches the SAP Fiori apps reference library via whichever MCP server your environment exposes for it, extracts Semantic Object and Action, and constructs proper FLP URLs with required parameters like sap-client and sap-language.
 license: MIT
 ---
 
@@ -10,10 +10,7 @@ This skill enables you to generate SAP Fiori Launchpad (FLP) URLs based on app n
 
 ## References & Tools
 
-When you need to look up SAP Fiori app information, you **MUST** use the following tools:
-
-- `mcp_mcp-sap-docs-local_sap_fiori_library_search(query="<app name>")`: Search for Fiori apps by name or keywords. Returns a list of apps with basic info.
-- `mcp_mcp-sap-docs-local_sap_fiori_library_fetch(id="<app_id>")`: Fetch detailed information about a specific Fiori app using its ID (e.g., F1511A), including the Semantic Object and Action required for URL generation.
+When you need to look up SAP Fiori app information, search and fetch from the SAP Fiori apps reference library using whichever MCP server/tool your environment exposes for it (`sap-dev-rule.md` §9). You need two lookups: (1) search by app name/keywords to get a list of candidate apps, (2) fetch full details for a specific App ID (e.g., F1511A) to get its Semantic Object and Action.
 
 ## Overview
 
@@ -56,15 +53,8 @@ The complete SAP Fiori Launchpad URL follows this pattern:
 
 ## Implementation Steps for the Agent
 
-1. **Search for the App**
-   ```python
-   mcp_mcp-sap-docs-local_sap_fiori_library_search(query="Create Maintenance Request")
-   ```
-2. **Fetch App Details**
-   From the search results, find the matching App ID (e.g., "F1511A") and fetch its details:
-   ```python
-   mcp_mcp-sap-docs-local_sap_fiori_library_fetch(id="F1511A")
-   ```
+1. **Search for the App**: search the Fiori apps reference library (query: app name/keywords, e.g. "Create Maintenance Request").
+2. **Fetch App Details**: from the search results, find the matching App ID (e.g., "F1511A") and fetch its full details.
 3. **Extract Semantic Object-Action**
    Look for the `SemanticObject` and `Action` fields in the returned data. If they are missing, report that the app cannot be launched via URL intent.
 4. **Construct the URL**
@@ -75,9 +65,9 @@ The complete SAP Fiori Launchpad URL follows this pattern:
 **User:** "Generate URL for Create Maintenance Request app with base URL https://myserver.com:44300 and client 100"
 
 **Agent:**
-1. Calls `mcp_mcp-sap-docs-local_sap_fiori_library_search(query="Create Maintenance Request")`
+1. Searches the Fiori apps reference library for "Create Maintenance Request".
 2. Identifies App ID: F1511A.
-3. Calls `mcp_mcp-sap-docs-local_sap_fiori_library_fetch(id="F1511A")`
+3. Fetches full details for F1511A.
 4. Finds Semantic Object: `MaintenanceWorkRequest` and Action: `create`.
 5. Responds to user:
 ```

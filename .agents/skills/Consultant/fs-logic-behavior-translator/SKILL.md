@@ -20,7 +20,7 @@ Read the "Processing Logic" or "Business Rules" sections of the FS carefully:
    - Scan the FS for standard SAP tables (e.g., ACDOCA, BSEG, MSEG, MARA) or classic unreleased APIs (e.g., standard Function Modules, BAPIs).
    - Flag them as violations of Clean Core in S/4HANA Cloud.
    - Propose replacements using **Released Standard CDS Views** (e.g., `I_AccountingDocumentJournal`, `I_MaterialDocumentItem_2`), **Released BTP APIs**, or standard BAdIs/EML patterns.
-   - **MANDATORY MCP USAGE**: You MUST use the MCP server `doc_sap_extension` (tools like `search`, `sap_search_objects`) or `doc_abap` to search the official SAP documentation for valid Cloud-ready replacements and to verify ABAP Cloud syntax/EML patterns. Do not guess the APIs.
+   - **MANDATORY MCP USAGE**: You MUST search official SAP documentation for valid Cloud-ready replacements and to verify ABAP Cloud syntax/EML patterns before proposing them — do not guess the APIs. Use whichever MCP server/tool your environment exposes for SAP documentation search (`sap-dev-rule.md` §9 — do not assume a hardcoded server name).
 6. **Extract Authorization Rules:** Identify standard SAP authorization objects mentioned or specific Data Control Language (DCL) requirements (e.g., restricting by Company Code).
 
 # EXPECTED OUTPUT

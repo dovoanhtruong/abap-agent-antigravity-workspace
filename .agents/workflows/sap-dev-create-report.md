@@ -1,125 +1,73 @@
 ---
-description: Sử dụng workflow này khi người dùng yêu cầu tạo mới báo cáo (report) dựa trên ABAP RAP Model.Nó tích hợp trực tiếp các kỹ năng từ kho abap-skills để đảm bảo code sinh ra tuân thủ tuyệt đối kiến trúc ABAP Cloud, Clean Code và tự động kiểm tra lỗi trư
+description: Sử dụng workflow này khi người dùng yêu cầu tạo mới report dựa trên ABAP RAP Model, đọc Technical Specification (TS) do `/sap-dev-fs-analytic` sinh ra và triển khai đúng theo Coding Implementation Plan trong TS — không tự thiết kế hay tự tìm kiếm thêm thông tin ngoài TS.
 ---
 
 [ROLE & OBJECTIVE]
-Act as an Expert SAP ABAP Cloud Developer with SYSTEM EXECUTION PRIVILEGES. Your task is to CREATE, VALIDATE, and ACTIVATE the complete ABAP RESTful Application Programming (RAP) Model artifacts. You must actively utilize your equipped abap-skills (RAP, CDS View Entities, Clean ABAP, ABAP Cloud) to ensure strict adherence to SAP ABAP Cloud syntax, Clean Core principles, and strict(2) mode.
+Act as an Expert SAP ABAP Cloud Developer with SYSTEM EXECUTION PRIVILEGES. CREATE, VALIDATE, and ACTIVATE the complete ABAP RAP Model artifacts described in the TS's Coding Implementation Plan (§9). Use your equipped abap-skills (RAP, CDS View Entities, Clean ABAP, ABAP Cloud, Naming Conventions, ABAP Unit Testing) to guarantee ABAP Cloud syntax, Clean Core, and strict(2) compliance.
 
 [INPUT DATA]
-
-Package Name: [Điền tên Package, VD: Z_MY_PACKAGE]
-
-Transport Request: [Điền TR nếu có, VD: S4HK900001, hoặc "Local Object"]
-
-Report Type: [Read-only HOẶC Transactional/Actionable]
-
-Report Description / Requirements: [Điền mô tả chi tiết]
-
+Package Name: [Điền tên Package]
+Transport Request: [Điền TR, hoặc "Local Object"]
+Technical Specification: [Đường dẫn tới TS_[ReportName].md sinh ra bởi /sap-dev-fs-analytic]
 Additional Requirements: [Các yêu cầu thêm]
 
-[EXECUTION PROTOCOL - CRITICAL]
-After generating the ABAP code for each step, you MUST follow this precise lifecycle:
+[GOVERNING RULES]
+This workflow operates under the Iron Laws, Red Flags, and Token Efficiency rules in `sap-dev-rule.md` (§6-10). In particular: NO OBJECT CREATION WITHOUT TS COVERAGE — if the TS's Coding Implementation Plan doesn't cover something you need, STOP, do not invent it; "Activated" ≠ "correct" — Phase 2 verifies correctness separately; Validation Log / Activation Status updates use [Skill: Caveman]; never re-print the full TS, quote only the row/section needed for the current step.
 
-0. TRANSPORT REQUEST (TR) BINDING: You MUST extract the TR from the [INPUT DATA] section. Every single time you call a tool to edit or create an SAP object (e.g., via MCP tool `SAP` action `edit` or `create`), you MUST explicitly include the parameter `transport: "<TR_NUMBER>"` or `corrNr: "<TR_NUMBER>"` to prevent the system from auto-generating an unwanted TR.
+[EXECUTION PROTOCOL — 4 PHASES]
 
-GENERATE: Use the specific abap-skills mentioned in each step to draft the code.
+## Phase 0 — Input Validation Gate
 
-VALIDATE (LINTING): Before deploying, automatically trigger the [Skill: ABAP/abaplint] or [Skill: Clean ABAP] to check the generated source code for syntax, Clean Core compliance, and best practices. Fix any Critical/Major issues.
+0.0 VALIDATE INPUT, in order:
+- The TS file exists and contains all 11 sections of the template, especially §9 Coding Implementation Plan with at least one row.
+- Transport Request is a valid TR number or explicitly "Local Object".
+- Package exists / is a valid target.
+- Every source view listed in TS §9 is marked released/verified per TS §3.
 
-DEPLOY & ACTIVATE: Use system tools (HTTP API/abapGit) to deploy and trigger ACTIVATION.
+If ANY check fails → 0.1. If all pass → 0.2.
 
-ERROR HANDLING:
+0.1 GRILL-ME ON GAPS: Use [Skill: Grill Me] (max 1-3 targeted questions) to collect exactly the missing information from 0.0. Do not proceed until 0.0 fully passes. If the gap is in the TS content itself (not just Package/TR), tell the user to re-run/patch `/sap-dev-fs-analytic` instead of improvising here.
 
-If Activation = ERROR: Read the system dump/error, consult [Skill: ABAP Cloud / Clean Core] for restricted API usage, auto-correct, and retry. If a chain of errors occurs, use [Skill: Handoff] to pause and ask the user for guidance.
+0.2 TASK LEDGER: Use [Skill: Scratchpad] (Ledger Format) to create `artifacts/scratchpads/scratchpad_[ReportName].md`, one row per object from TS §9 in the TS's specified order, status TODO/DOING/DONE/FAILED. This ledger is the single source of truth for build progress — if the session is interrupted or context is compacted, re-read the ledger instead of re-deriving progress from memory.
 
-If Activation = WARNING: Resolve if it violates strict(2). Report to user if unavoidable.
+0.3 TR BINDING: Extract the TR from [INPUT DATA]. Every tool call that creates or edits an SAP object must explicitly pass the transport/correction-number parameter matching this TR, to prevent an unwanted auto-generated TR. Verify the exact parameter name/tool signature available in your environment before first use (`sap-dev-rule.md` §9) — do not assume a hardcoded tool name.
 
-If Activation = SUCCESS: Log success and proceed.
+## Phase 1 — Sequential RAP Build (per TS §9, in the TS's specified order)
 
-[STEP-BY-STEP INSTRUCTIONS]
-Please execute the following sequence:
+For each row in TS §9, execute the matching step below in order. **Never build an object or logic absent from TS §9** — if something is missing, STOP and escalate via 0.1.
 
-Step 0: Planning & Drafting
-Required Skill: [Skill: Scratchpad]
-Action: Draft the RAP architecture, object names, and logic in the scratchpad before executing subsequent steps to ensure correctness and save tokens.
-Save the scratchpad draft to the path:
-`generated_docs/scratchpads/scratchpad_[ReportName].md` (relative to the workspace root)
-All project tracking/walkthrough artifacts (such as implementation plans, task checklists, and final walkthroughs) must be saved under:
-`generated_docs/walkthroughs/` (relative to the workspace root)
+Per step: GENERATE (draft per the row's spec) → check the name against [Skill: Naming Conventions] → VALIDATE (Lint via [Skill: ABAP Lint & Review] or [Skill: Clean ABAP], fix Critical/Major) → DEPLOY & ACTIVATE → update the ledger row. On activation ERROR: read the exact system error (never guess), consult [Skill: ABAP Cloud / Clean Core], auto-correct and retry; on a chain of errors use [Skill: Handoff] to pause and ask the user. On WARNING: resolve if it violates strict(2), otherwise report as unavoidable.
 
+**Step 1 — Query Data (CDS Data Models):** [Skill: CDS View Entities] + [Skill: Find Released CDS View]. Re-verify sources are released (should already hold per TS §3/§9). Create the Interface View (`DEFINE ROOT VIEW ENTITY`), associations, `@AccessControl.authorizationCheck: #CHECK`, auxiliary views if needed. Execute: Lint → Push → Activate. If TS §9 specifies a Custom Entity (`CE_` prefix) instead of a standard CDS Interface View, use [Skill: RAP Query Provider] to implement `IF_RAP_QUERY_PROVIDER` (paging/sorting/filtering) in place of the standard BDEF-driven read in this step and Step 3.
 
-Step 1: Query Data (CDS Data Models)
+**Step 2 — Access Control (DCL):** [Skill: Authorization & IAM]. Create `DEFINE ROLE` with `pfcg_auth` per TS §10. Execute: Lint → Push → Activate.
 
-Required Skill: [Skill: CDS View Entities] & [Skill: Find Released CDS View]
+**Step 3 — Behavior Definition (Base):** [Skill: RAP]. Managed/unmanaged per TS, draft handling if applicable, actions/determinations per TS §5/§7. Execute: Lint → Push → Activate.
 
-Action:
-1.0 RELEASED SOURCE VALIDATION: Before creating any CDS view, use [Skill: Find Released CDS View] to verify that all base data sources referenced in the Technical Specification are released clean-core CDS views (Clean Core Level A). If any unreleased table or internal view is found, search for and replace with the best released alternative matching the required grain and field coverage.
-1.1 Create the underlying Interface View (DEFINE ROOT VIEW ENTITY). Apply built-in functions, associations, and @AccessControl.authorizationCheck: #CHECK. Create Auxiliary Views if complex joins are needed. Use ONLY verified released CDS views as data sources.
+**Step 4 — Class Implementation (Behavior Pool):** [Skill: RAP] + [Skill: ABAP SQL & AMDP] + [Skill: Modern ABAP Syntax]. Skip if Read-only. Implement exactly the logic documented in TS §5 — no additional logic beyond it. If TS §7 specifies a business event to raise on an action/determination, use [Skill: RAP Business Events] to define and raise it here. Execute: Lint → Push → Activate.
 
-Execute: Lint -> Push -> Activate.
+**Step 4.5 — Side-task (optional, non-blocking):** [Skill: ABAP Unit Testing] — generate a test class skeleton for the Step 4 class. Dispatch as a parallel subagent if available; otherwise run inline right after Step 4 without blocking Step 5.
 
-Step 2: Access Control (DCL)
+**Step 5 — Projection View & Metadata Extension:** [Skill: CDS View Entities]. Create the projection (`AS PROJECTION ON`) with `@Search`, `@EndUserText`, `@Metadata.allowExtensions: true`. Do NOT put `@UI` annotations in the projection — generate the full Metadata Extension source and save it to `artifacts/metadata_extensions/ZMD_[ReportName].md`; tell the user to create the DDLX object manually in Eclipse ADT (the automated tool cannot create DDLX objects directly). Execute: Lint → Push → Activate (Projection View only).
 
-Required Skill: [Skill: Authorization & IAM]
+**Step 6 — Projection Behavior:** [Skill: RAP]. Skip if no Base BDEF. Execute: Lint → Push → Activate.
 
-Action: Create the Access Control (DEFINE ROLE) using pfcg_auth for the Base View.
+**Step 7 — Service Definition & Binding:** [Skill: OData Service Development]. Create Service Definition, then Service Binding (OData V4 UI, per TS unless stated otherwise). Execute: Lint → Push → Activate.
 
-Execute: Lint -> Push -> Activate.
+## Phase 2 — Manual Runtime Verify Loop (max 3 iterations)
 
-Step 3: Behavior Definition (BDEF for Base View)
+2.0 Once all Phase-1 objects are activated, derive 2-3 representative test filter values from TS §3-§5 (e.g. a known period/company code for a balance calculation) plus the exact expected result/logic for each. **No automated data-preview tool is assumed available** — ask the user to run the OData service (Fiori Preview / Postman / SEGW test) with these filters and paste back the actual result.
 
-Required Skill: [Skill: RAP (RESTful ABAP Programming Model)]
+2.1 Evidence floor (`sap-dev-rule.md` §11): a bare "looks fine" is not a PASS. If the user's reply has no concrete data, ask again for the actual field values/payload before recording a result. Log each attempt in the Scratchpad ledger's Verify Attempts table.
 
-Action: Create the BDEF. Use managed/unmanaged patterns with draft handling if applicable. Define actions/determinations based on 'Report Type'.
+2.2 Compare the pasted actual result against the TS-documented logic field by field, especially the "Complex Logic" entries from TS §5. PASS → Phase 3. MISMATCH → root-cause it (trace the actual-vs-expected diff to the specific object/field responsible — do not guess), fix, redeploy the affected object(s), and ask the user to re-test. After 3 mismatch iterations, STOP — write up the concrete unresolved discrepancy and ask the user rather than attempting a 4th blind fix (`sap-dev-rule.md` §7). If the user insists on accepting an unverified result, record it as "PASS — unverified, user-accepted", never as a plain PASS.
 
-Execute: Lint -> Push -> Activate.
+## Phase 3 — Walkthrough & Risk Report
 
-Step 4: Class Implementation (Behavior Pool)
-
-Required Skill: [Skill: RAP], [Skill: ABAP SQL & AMDP] & [Skill: Modern ABAP Syntax]
-
-Action: (Skip if Read-only). Generate the ABAP Global Class (CLASS lhc_...). Use modern ABAP SQL and Modern ABAP Syntax (Constructor Expressions, String Templates, EML syntax) for business logic.
-
-Execute: Lint -> Push -> Activate.
-
-Step 5: Projection View (ZC_...) & Metadata Extension (MDE)
-
-Required Skill: [Skill: CDS View Entities]
-
-Action: Create DEFINE ROOT VIEW ENTITY ... AS PROJECTION ON. Include @Search, @EndUserText, and @Metadata.allowExtensions: true.
-CRITICAL: Do NOT put @UI annotations inside the Projection View. Instead, generate the full Metadata Extension (MDE) source code and save it as an artifact file at `generated_docs/metadata_extensions/ZMD_[ReportName].md` (relative to the workspace root). Explicitly instruct the user to manually create a new Metadata Extension object in Eclipse ADT and paste this code, because the MCP tool cannot directly create DDLX objects on the SAP server.
-
-Execute: Lint -> Push -> Activate (for the Projection View only).
-
-Step 6: Projection Behavior
-
-Required Skill: [Skill: RAP]
-
-Action: (Skip if no Base BDEF). Create the Projection BDEF.
-
-Execute: Lint -> Push -> Activate.
-
-Step 7: Service Definition & Binding
-
-Required Skill: [Skill: OData Service Development]
-
-Action:
-7.1 Create Service Definition (DEFINE SERVICE).
-7.2 Recommend/Create Service Binding (OData V4 - UI).
-
-Execute: Lint -> Push -> Activate.
+3.0 Save `artifacts/walkthroughs/walkthrough_[ReportName].md`: what was built (object list from the ledger, all DONE), what was verified and how (cite the actual filter values and results from Phase 2 — never "should work"), and any known risks/manual steps outstanding (e.g. "Metadata Extension pending manual creation in ADT"). If a UI Service Binding (Step 7) was created, optionally use [Skill: SAP Fiori Apps Reference] to generate the Fiori Launchpad URL from its Semantic Object/Action and include it in the walkthrough.
 
 [OUTPUT FORMAT]
-For each step, provide:
-
-The Object Name & Applied Skill (e.g., ZC_MY_REPORT - [Skill: CDS View Entities]).
-
-The exact validated ABAP source code (markdown).
-
-The SYSTEM EXECUTION RESULT:
-
-Validation Log (abaplint / Clean ABAP results).
-
-Activation Status (Activated / Failed / Activated with Warnings).
-
-Auto-Correction Log (if errors occurred).
+For each Phase-1 step, report in [Skill: Caveman] style (short, evidence-based, no filler):
+- The Object Name & Applied Skill (e.g., `ZC_MY_REPORT` — [Skill: CDS View Entities]).
+- The exact validated ABAP/CDS source code (markdown).
+- SYSTEM EXECUTION RESULT: Validation Log (abaplint/Clean ABAP), Activation Status (Activated/Failed/Activated with Warnings), Auto-Correction Log if any.

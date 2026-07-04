@@ -95,7 +95,7 @@ Example: if the user asks for "Zalo/mobile number of customer" and expects a com
 
 ## Step 3: Search Released DDLS Objects
 
-Use the `doc_sap_cds_kb` server to search for complete, packaged CDS views:
+Use the `doc_sap_cds_kb` server to search for complete, packaged CDS views (verify this server/tool name is actually available in your session before your first call — `sap-dev-rule.md` §9):
 
 ```json
 call_mcp_tool(
@@ -117,7 +117,7 @@ If the result set is too broad:
 If no results are found:
 - Try exact SAP naming stems from the business domain.
 - Try a neighboring application component module.
-- Search documentation using `call_mcp_tool` with ServerName `doc_sap_extension` and ToolName `search` for the business object name plus "CDS view released API".
+- Search documentation using `call_mcp_tool` with ServerName `doc_sap_extension` and ToolName `search` for the business object name plus "CDS view released API" (same verify-before-use caveat — `sap-dev-rule.md` §9).
 - Report that no released DDLS candidate was found before widening criteria.
 
 ## Step 4: Verify Each Candidate
@@ -140,18 +140,7 @@ Reject or downgrade candidates when:
 - The application component is clearly outside the user's domain.
 - The object has a successor and the successor is a better fit.
 
-Then verify usability in the actual SAP system:
-
-```
-SAPRead(type="DDLS", name="<candidate>")
-SAPRead(type="API_STATE", name="<candidate>", objectType="DDLS")
-```
-
-If available, inspect fields and dependencies:
-
-```
-SAPContext(type="DDLS", name="<candidate>", action="deps")
-```
+Then verify usability in the actual SAP system using whichever ADT/system-connection tool your environment exposes for reading a DDLS object's definition and release/API state (`sap-dev-rule.md` §9 — do not assume a hardcoded tool name). You need two lookups: (1) the object's definition/readability, (2) its release/API state. If the same tool family supports dependency inspection, use it to check the candidate's associated fields and dependencies too.
 
 Mark a candidate as "released but not locally usable" if the local system cannot read it, does not contain it, or the current user lacks access.
 

@@ -1,9 +1,14 @@
+---
+description: Sử dụng workflow này khi cần chẩn đoán và sửa lỗi (bug) trên object SAP hiện có, dựa trên mock data do user cung cấp, đảm bảo phân tích root cause và đánh giá rủi ro trước khi sửa.
+---
+
 # Workflow: Bug Fix & Troubleshooting
 **Trigger Command:** `/sap-dev-bug-fix`
 
 ## Context & Core Constraints
 - **No Live Business Data:** The Agent is connected to the DEV environment only. Testing and bug verification must rely on source code logic analysis or **Mock Data / Sample Data** provided manually by the User.
 - **Cross-Impact Analysis (Mandatory):** Any logic/condition change must be evaluated for regression risks affecting other objects or business flows that reuse this component. If a risk is detected, the Agent **MUST report and request User approval** before making any code changes.
+- **Governing Rules:** Operates under the Iron Laws, Red Flags, and Token Efficiency rules in `sap-dev-rule.md` (§6-10) — in particular, a root-caused fix is not a verified fix until Phase 4's unit test evidence exists; progress updates use `[Skill: Caveman]`.
 
 ---
 
@@ -31,10 +36,14 @@
 - **HALT and wait for the User's explicit approval** of the proposed solution.
 
 ### Phase 4: Fix Implementation & Quality Assurance
-4. **Load `CDS View Entities`, `RAP Model`, `Modern ABAP Syntax`, `OO Design Patterns` & `Clean ABAP`**:
+4. **Load `CDS View Entities`, `RAP`, `Modern ABAP Syntax`, `OO Design Patterns` & `Clean ABAP`**:
    - Implement the code changes based on the approved solution. Ensure the code uses Modern ABAP syntax and strictly follows `Clean ABAP` principles. Apply OO Design Patterns if refactoring complex logic.
 5. **Load `ABAP Unit Testing`**:
    - Create or update the Local Test Class (`cl_abap_unit_assert`) using Test Doubles and the Mock Data provided by the User.
    - **Note:** Creating an ABAP Unit Test using Mock Data is mandatory to compensate for the lack of real data in DEV and to prevent future regressions.
 6. **Boundary & Activation Check**:
    - Ensure NO Standard Objects were modified. Provide a clear list of the specific Objects the User needs to Activate in the system.
+
+## Output Format
+
+Report in `[Skill: Caveman]` style (short, evidence-based). Save a Fix Report to `artifacts/walkthroughs/walkthrough_bugfix_[ObjectName].md` containing: the root cause, the approved fix applied, the ABAP Unit Test evidence (not "should work"), the Cross-Impact Report, and the exact list of objects to activate.

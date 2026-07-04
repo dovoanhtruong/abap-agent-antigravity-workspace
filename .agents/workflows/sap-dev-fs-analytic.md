@@ -1,65 +1,121 @@
 ---
-description: Sử dụng workflow này khi cần phân tích tài liệu Functional Specification (FS) để tạo ra bản Technical Specification đầu vào chuẩn xác cho quy trình tự động sinh code ABAP RAP Cloud.
+description: Sử dụng workflow này khi cần phân tích tài liệu Functional Specification (FS) để tạo ra bản Technical Specification (TS) đầy đủ, chính xác và đủ chi tiết để workflow `/sap-dev-create-report` thực thi mà không cần tự thiết kế thêm.
 ---
 
 [ROLE & OBJECTIVE]
-Act as an Expert SAP Solution Architect and Technical Analyst. Your primary task is to deeply read and analyze a provided Functional Specification (FS) document. You must utilize your equipped skills to translate business logic, UI requirements, and data constraints into structured technical specifications strictly aligned with SAP ABAP Cloud and Clean Core architecture.
+Act as an Expert SAP Solution Architect and Technical Analyst. Deeply read and analyze a Functional Specification (FS) document, then translate business logic, UI requirements, and data constraints into a Technical Specification (TS) strictly aligned with SAP ABAP Cloud and Clean Core architecture. The TS you produce is the ONLY input `/sap-dev-create-report` will read — it must be complete enough that create-report never has to guess or design on its own.
 
 [INPUT DATA]
+- Functional Specification (FS): file(s) in `artifacts/fs_docs/`, or FS text pasted directly.
 
-- Functional Specification (FS) Content: [Text nội dung của FS, đặc biệt lưu ý các phần: Cấu trúc biểu mẫu, Cấu trúc dữ liệu nền, Logic xử lý]
+[GOVERNING RULES]
+This workflow operates under the Iron Laws, Red Flags, and Token Efficiency rules in `sap-dev-rule.md` (§6-10). In particular: no TS handoff without passing the Verify Loop (Phase 5); progress updates use [Skill: Caveman]; never re-print full drafts already saved to a file, reference the path instead.
 
-[EXECUTION PROTOCOL - CRITICAL]
-Analyze the FS sequentially using your specific analytical skills:
+[EXECUTION PROTOCOL — 6 PHASES]
 
-0. DRAFTING: Use [Skill: Scratchpad] to draft and validate your findings before outputting the final specification.
-0.1. DOCUMENT PRE-PROCESSING: Use [Skill: Document Markdown Converter] to convert binary FS files (PDF, DOCX, XLSX) located in `fs_docs/` into Markdown using MarkItDown CLI. Save it to `generated_docs/scratchpads/fs_markdown.md`. READ this Markdown file for all subsequent analysis steps instead of the original file.
-0.2. IMAGE PROCESSING: If the FS contains images (e.g., UI mockups, flowcharts), use `markitdown-ocr` or AI Vision to extract and transcribe their content.
-0.3. DATA COMPLETENESS CHECK: After pre-processing, review the extracted text. If the FS explicitly refers to fields, tables, or requirements that are contained within an image, an external link (e.g., Google Drive), or a complex table that failed to convert properly, you MUST STOP and explicitly ask the user to provide that missing information (e.g., by uploading the image or pasting the text) BEFORE proceeding to draft the TS. Do not guess or use placeholder ranges (like "Fields 1 to 39").
-1. DATA MODELING ANALYSIS: Use [Skill: SAP Data Model Extractor] to scan the pre-processed FS for standard/custom tables, CDS Views (e.g., I_AccountingDocument...), join conditions, cardinalities, global parameters, and required output fields.
-   1.1. RELEASED CDS VALIDATION: Use [Skill: Find Released CDS View] to verify that all identified data sources (tables, CDS views) are released clean-core APIs (Clean Core Level A, S/4HANA Cloud Public). For any unreleased or internal views/tables found in the FS, search and recommend the best released CDS view replacement that matches the required business grain and field coverage.
-2. UI/UX ANALYSIS: Use [Skill: Fiori UI Elements Mapper] to analyze the report layout. Identify which fields are mandatory filters (Selection Fields) and the exact order/properties of columns (Line Items). Identify sum/subtotal/sorting requirements.
-3. BUSINESS LOGIC EXTRACTION: Use [Skill: ABAP Logic & Behavior Translator] to identify complex processing rules (e.g., opening/closing balances, fallback chains for descriptions, positive/negative quantity reversals, unit/currency mapping). Determine if these should be handled via CDS Logic (Case/When) or ABAP Virtual Elements/Behavior classes.
-4. AUTHORIZATION & SECURITY: Identify if the FS mentions specific Data Control Language (DCL) requirements or standard PFCG auth objects.
-5. TS VERIFICATION: Cross-check the drafted Technical Specification against the original FS. You MUST verify that 100% of the fields specified in the FS are present (with their exact names, not placeholders), and that every single field has its data mapping/extraction logic fully and correctly documented.
+## Phase 0 — Intake & Pre-processing
 
-[OUTPUT FORMAT - CRITICAL]
-Your final output MUST follow this exact template to act as the direct input for the `/sap-dev-create-report` workflow, and it will also serve as the official Technical Specification (TS) document for the Report. Do not add introductory or concluding remarks outside this template.
+0.0 TASK LEDGER: Use [Skill: Scratchpad] to create `artifacts/scratchpads/scratchpad_[ReportName].md` with the Ledger Format (TODO/DOING/DONE/FAILED) covering Phases 0-6. Update it immediately after each phase — it is the single source of truth for progress, not this conversation's history.
 
-Save the output as a Markdown file (.md) directly under the following path:
-`generated_docs/technical_specifications/TS_[ReportName].md` (relative to the workspace root)
-Replace `[ReportName]` with the actual descriptive name of the report in CamelCase.
+0.1 DOCUMENT PRE-PROCESSING: Use [Skill: Document Markdown Converter] to convert binary FS files (PDF/DOCX/XLSX) in `artifacts/fs_docs/` into `artifacts/scratchpads/fs_markdown.md`. Skip if the FS is already plain text/Markdown. From here on, read `fs_markdown.md` only — never the original binary.
 
+0.2 VISUAL EXTRACTION: If the FS contains images (UI mockups, flowcharts, Excel screenshots), use [Skill: FS Vision Extractor] to transcribe them into Markdown and append the result into `fs_markdown.md` under a clearly labeled heading (e.g. `## Extracted from Image: <name>`). Skip if the FS has no images.
 
+0.3 DATA COMPLETENESS GATE (HARD GATE): Review `fs_markdown.md`. If the FS explicitly references fields/tables/requirements that live in an unprocessed image, an external link, or a table that failed conversion, STOP and ask the user to provide the missing information. Do not guess or use placeholder ranges (e.g. "Fields 1 to 39"). Do not proceed to Phase 1 until this gate passes.
+
+## Phase 1 — Data Model Foundation (sequential — every later phase reuses this vocabulary)
+
+1.0 DATA MODELING ANALYSIS: Use [Skill: Data Model Extractor] on `fs_markdown.md` → Data Model Draft (Base Views/Tables, Joins & Conditions, Key Fields, Hardcoded Filters, Output Fields).
+
+1.1 RELEASED CDS VALIDATION: Use [Skill: Find Released CDS View] to verify every source in the Data Model Draft is a released Clean-Core-Level-A CDS view (S/4HANA Cloud Public). Replace any unreleased/internal table or view with the best released alternative matching grain and field coverage. Output: **Verified Data Model** — the field/source vocabulary every later phase must reuse verbatim (identical field and view names) to avoid drift.
+
+## Phase 2 — Domain Analysis (parallel if subagents available, sequential otherwise — identical output either way)
+
+2.A/2.B/2.C each take `fs_markdown.md` + the Verified Data Model as read-only input and produce one independent draft. If your environment supports dispatching parallel subagents, fan these three out concurrently (each agent scope: read-only input, write only its own draft, no shared state). If parallel dispatch is unavailable or unconfirmed, run them sequentially in the order below — the result is identical, only slower. Do not block on parallel dispatch being available.
+
+2.A UI/UX ANALYSIS: [Skill: Fiori UI Elements Mapper] → UI Layout Draft (Selection Fields, Line Items, Sorting/Grouping, Object Page Facets).
+
+2.B BUSINESS LOGIC EXTRACTION: [Skill: ABAP Logic & Behavior Translator] → Business Logic Draft (Report Type, CDS-level derived fields, Virtual Elements/ABAP-level complex logic, Actions/Determinations, Clean Core violations + released replacements, Authorization Check). This skill already mandates MCP-verified replacements for any unreleased API it flags — do not skip that check.
+
+2.C INTEGRATION & API ANALYSIS: [Skill: Integration & API Analyzer] → Integration Draft (Integration Pattern, OData Service Model, API Style Compliance, Field Mapping Table, Security/Auth). If the FS has no integration/interface requirements, output exactly "N/A — FS has no integration requirements" rather than skipping the step silently.
+
+2.D RECONCILIATION: Cross-check the three drafts against the Verified Data Model — every field name referenced in 2.A/2.B/2.C must exist in the Verified Data Model under the same name. List any mismatch as a Conflict and resolve it (align naming, or return to Phase 1 if a field is genuinely missing) before proceeding to Phase 3.
+
+## Phase 3 — Architecture & Coding Implementation Plan (the phase create-report depends on most)
+
+3.0 ARCHITECTURE BRAINSTORM: Only when the Business Logic Draft contains genuinely complex/ambiguous logic (e.g. multi-level fallback chains, period-anchor balance calculations, a real choice between CDS Virtual Element vs. Behavior Pool vs. Custom Entity + Query Provider), generate 2-3 candidate architectures with explicit trade-offs (Clean Core compliance / Performance / Maintainability), pick one, and state why. For straightforward reports with no such ambiguity, skip the multi-option comparison and go straight to the obvious design — do not manufacture false choices just to seem thorough.
+
+3.1 CODING IMPLEMENTATION PLAN (the section `/sap-dev-create-report` depends on entirely): using [Skill: Naming Conventions] for every object name, produce a complete table of every object to be created:
+
+| # | Object Name | Type | Purpose | Source/Base + Join/Association | Field Mapping (which TS output field(s) it delivers) | Corresponding create-report Step |
+|---|---|---|---|---|---|---|
+
+This table must cover 100% of what create-report's Steps 1-7 will need (Interface View, DCL, Behavior Definition, Behavior Pool Class, Projection View, Metadata Extension, Projection Behavior, Service Definition/Binding) — enough that create-report performs zero independent design or lookup.
+
+## Phase 4 — Assemble TS
+
+4.0 Merge every draft and the Coding Implementation Plan into the full TS using the template in [OUTPUT FORMAT] below.
+
+## Phase 5 — Verify Loop (max 3 automatic iterations)
+
+5.0 Cross-check the TS draft against `fs_markdown.md`:
+- 100% of FS fields are present with exact names (no placeholders).
+- Every field has documented source + derivation logic.
+- Every row in the Coding Implementation Plan has a clear source/target and references no field absent from the Verified Data Model.
+
+PASS → Phase 6. FAIL → fix the specific gap in the phase it belongs to, then re-run this gate. Log each attempt in the Scratchpad ledger's Verify Attempts table (see Scratchpad skill) so the 3-iteration cap is tracked, not just remembered. After 3 failed iterations, STOP — list the exact unresolved blockers and ask the user instead of continuing to guess (Red Flags, `sap-dev-rule.md` §7).
+
+## Phase 6 — Handoff
+
+6.0 Save the TS, mark the ledger fully DONE. If the session ends here before `/sap-dev-create-report` runs, use [Skill: Handoff] to summarize state for the next session.
+
+[OUTPUT FORMAT — CRITICAL]
+Save the final TS as Markdown directly under `artifacts/technical_specifications/TS_[ReportName].md` (relative to workspace root). Do not add introductory or concluding remarks outside the template. Use CamelCase for `[ReportName]`.
+
+```
+# Technical Specification: [ReportName]
+
+## 1. Tổng Quan (Overview)
+[Mục đích report, đối tượng sử dụng, phạm vi nghiệp vụ — bám sát FS, 1 đoạn ngắn]
+
+## 2. Tham Số & Layout
 Package Name: [Target Package]
-
 Transport Request: [Target Transport Request]
+Report Type: [Read-only OR Transactional/Actionable — determined strictly from FS]
 
-Report Type: [Determine strictly from FS: Read-only OR Transactional/Actionable]
-
-Report Description / Requirements:
-*Data Model Architecture:*
-
+## 3. Data Model Architecture
 - Base Views/Tables: [List all source views/tables with their specific purpose]
-- Joins & Conditions: [Specify ON conditions, e.g., A LEFT OUTER JOIN B ON A.Field = B.Field]
-- Key Fields: [List key fields]
-- Hardcoded Filters: [List mandatory filters, e.g., Ledger = '0L']
-- Output Fields: [MANDATORY: List 100% of all fields specified in the FS. For EACH field, you MUST clearly and completely describe the exact logic, source view/table, join conditions, or derivation rules required to extract its data.]
+- Joins & Conditions: [Exact ON conditions]
+- Key Fields: [List]
+- Hardcoded Filters: [List]
+- Output Fields: [MANDATORY: 100% of FS fields, each with its exact source/derivation logic]
 
-*UI & Layout (Fiori Elements):*
+## 4. UI & Layout (Fiori Elements)
+- Selection Fields (Filters): [List, mark mandatory ones]
+- Line Items: [100% of display fields in sequence, mapped to Output Fields above]
+- Default Sorting/Grouping: [List]
 
-- Selection Fields (Filters): [List fields used as search parameters, explicitly mark mandatory ones]
-- Line Items: [List 100% of the fields to display in the Grid/List Report in their correct sequence, detailing how each is populated based on the output fields logic]
-- Default Sorting/Grouping: [List specific default sort order]
+## 5. Business Logic & Behavior
+- Derived/Calculated Fields (CDS): [List]
+- Complex Logic (Virtual Elements / ABAP): [List]
+- Authorization Check: [Auth objects / standard propagation]
 
-*Business Logic & Behavior:*
+## 6. Integration & API
+[From Phase 2.C — or "N/A — FS has no integration requirements"]
 
-- Derived/Calculated Fields (CDS): [Logic that can be done in CDS, e.g., simple Case/When for signs]
-- Complex Logic (Virtual Elements / ABAP): [List logic requiring ABAP, e.g., "Implement Virtual Element to calculate opening balance using Period-End Anchor mechanism", "Implement 5-level fallback chain for description column"]
-- Authorization Check: [Identify required authorization objects or standard propagation]
+## 7. Tính Năng & Hành Vi (Features & Actions)
+[Buttons/links/actions and the logic each triggers, if the FS specifies any — otherwise "None"]
 
-Additional Requirements:
+## 8. Print Form
+[Brief description only if the FS requires printing. Note: handled by a separate print-form flow, out of scope for this report engine]
 
-- [Mention specific naming conventions required by the FS, e.g., Prefix ZC_...]
-- [Mention specific UI/Action requirements, e.g., Custom Excel Export button if requested]
-- [Use [Skill: Handoff] if the session ends here before transitioning to the developer workflow]
+## 9. Coding Implementation Plan
+[Full table from Phase 3.1]
+
+## 10. Authorization Check
+[Auth objects / PFCG / DCL requirements]
+
+## 11. Additional Requirements
+- [Naming conventions beyond the default, if the FS specifies any]
+- [Extra UI/Action requirements, e.g. custom Excel export]
+```

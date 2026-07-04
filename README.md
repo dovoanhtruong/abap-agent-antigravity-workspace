@@ -29,17 +29,21 @@ abap_workspaces/
 │   │   └── Productivity/           # 🚀 Performance Optimization & Context Management skills
 │   │       └── grill-me/ , caveman/ , handoff/ , scratchpad/
 │   └── workflows/                  # ⚙️ Business process automation scripts
-│       ├── sap-dev-analytic-fs.md  # Process for analyzing FS into Technical Spec
+│       ├── sap-dev-fs-analytic.md  # Process for analyzing FS into Technical Spec
 │       ├── sap-dev-create-report.md# Process for auto-generating ABAP RAP reports
 │       ├── sap-dev-api-inbound.md  # Process for Inbound API integration based on Z_API_FWK
 │       ├── sap-dev-api-outbound.md # Process for Outbound API integration based on Z_API_FWK
-│       ├── sap-dev-system-analysis.md # Process for analyzing SAP system architecture
+│       ├── sap-dev-bug-fix.md      # Process for root-cause debugging & regression-safe fixes
+│       ├── sap-dev-code-analysis.md # Process for analyzing SAP system architecture
 │       └── sap-dev-code-review.md  # Process for strict Code Review & QA
-├── fs_docs/                        # 📄 Directory containing input Functional Specification (FS) documents
-├── generated_docs/                 # 📂 Directory containing automatically generated technical documents
-│   ├── technical_specifications/   # Technical Specifications (TS_*.md)
-│   ├── scratchpads/                # Architectural drafts and planning (Scratchpads - scratchpad_*.md)
-│   └── walkthroughs/               # Deployment guides, testing & task checklists
+├── artifacts/                       # 📦 Single root for all input/output artifacts (gitignored)
+│   ├── fs_docs/                     # 📄 Input Functional Specification (FS) documents
+│   ├── technical_specifications/    # Technical Specifications (TS_*.md)
+│   ├── scratchpads/                 # Architectural drafts, planning & progress ledgers
+│   │   └── review/                  # Code Review reports (review_*.md)
+│   ├── walkthroughs/                # Deployment guides, testing & task checklists
+│   ├── metadata_extensions/         # Generated Metadata Extension (DDLX) source, pending manual ADT creation
+│   └── system_analysis/             # System/package analysis reports
 └── README.md                       # 📖 User documentation (This file)
 ```
 
@@ -60,11 +64,11 @@ Rules running silently during each interaction. It forces the Agent to strictly 
 
 ### 3. Automation Scripts (Workflows)
 Use dedicated Slash Commands designed for complex processes:
-* `/sap-dev-analytic-fs`: Automatically triggers the Consultant skill chain to deeply analyze Word/PDF FS files, extract the Data Model structure, Fiori Elements layout, balance calculation/fallback logic, and output a standard Technical Specification.
+* `/sap-dev-fs-analytic`: Automatically triggers the Consultant skill chain to deeply analyze Word/PDF FS files, extract the Data Model structure, Fiori Elements layout, balance calculation/fallback logic, and output a standard Technical Specification.
 * `/sap-dev-create-report`: Takes a Technical Spec as input, automatically triggers the Developer skill chain to write clean code, create CDS View Entities, Access Controls (DCL), Business Services, RAP BO Behavior Pools, and perform automated testing.
 * `/sap-dev-api-inbound`: Build external API receiving functionalities adhering to the `Z_API_FWK` architecture.
 * `/sap-dev-api-outbound`: Build outbound calls to other systems ensuring logging mechanisms and response handling via `execute_api`.
-* `/sap-dev-system-analysis`: Automatically scan, deep-dive, and generate comprehensive architecture documentation for objects/packages.
+* `/sap-dev-code-analysis`: Automatically scan, deep-dive, and generate comprehensive architecture documentation for objects/packages.
 * `/sap-dev-code-review`: Perform rigorous source code reviews (including Cross-Impact Check), evaluate potential risks, and propose performance/maintainability optimizations.
 
 ---
@@ -72,11 +76,11 @@ Use dedicated Slash Commands designed for complex processes:
 ## 🚀 Quick Start Guide
 
 ### Step 1: Prepare Input Documents
-Ensure you have placed the Functional Specification (FS) document into the `fs_docs/` directory of the workspace (e.g., a `.docx` Word file or Text file).
+Ensure you have placed the Functional Specification (FS) document into the `artifacts/fs_docs/` directory of the workspace (e.g., a `.docx` Word file or Text file).
 
 ### Step 2: Trigger the FS Analysis Process
 Send an analysis request to the Agent with the document path.
-* *Example:* `"Please trigger the /sap-dev-analytic-fs workflow to analyze the FS document [SAPER_2025_PM_FS.docx](./fs_docs/SAPER_2025_PM_FS.docx) belonging to Package Z_INVENTORY_REPORT"`
+* *Example:* `"Please trigger the /sap-dev-fs-analytic workflow to analyze the FS document [SAPER_2025_PM_FS.docx](./artifacts/fs_docs/SAPER_2025_PM_FS.docx) belonging to Package Z_INVENTORY_REPORT"`
 
 ### Step 3: Evaluate Technical Spec & Generate Code
 After the Agent completes the analysis and returns a standard Technical Specification structure, please review it. Then, trigger the `/sap-dev-create-report` command for the Agent to automatically generate comprehensive ABAP RAP code for you.

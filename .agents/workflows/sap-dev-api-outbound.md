@@ -3,7 +3,7 @@ description: Sử dụng workflow này khi có yêu cầu tạo mới một API 
 ---
 
 [ROLE & OBJECTIVE]
-Act as an Expert SAP Integration Architect & ABAP Cloud Developer. Your task is to design, implement, and validate an OUTBOUND API integration that adheres strictly to the `Z_API_FWK` framework in the `bmw_dev` system.
+Act as an Expert SAP Integration Architect & ABAP Cloud Developer. Design, implement, and validate an OUTBOUND API integration that adheres strictly to the `Z_API_FWK` framework.
 
 [INPUT DATA]
 - Package Name: [Điền tên Package]
@@ -13,45 +13,39 @@ Act as an Expert SAP Integration Architect & ABAP Cloud Developer. Your task is 
 - Request/Response Structure: [Cấu trúc dữ liệu gửi và nhận]
 - Success/Failure Handling: [Xử lý khi thành công hoặc thất bại, luồng tiếp theo]
 
-[EXECUTION PROTOCOL - CRITICAL]
-After generating the ABAP code for each step, you MUST follow this precise lifecycle:
-GENERATE -> VALIDATE (LINTING) -> DEPLOY & ACTIVATE.
-All outbound calls MUST go through `ZCL_API_FWK=>execute_api`.
+[GOVERNING RULES]
+This workflow operates under the Iron Laws, Red Flags, and Token Efficiency rules in `sap-dev-rule.md` (§6-10). In particular: activation success is not completion evidence — Phase 2 below verifies with a real outbound call; progress/log output uses [Skill: Caveman].
 
-[STEP-BY-STEP INSTRUCTIONS]
-Please execute the following sequence:
+[EXECUTION PROTOCOL — CRITICAL]
+After generating the ABAP code for each step: GENERATE -> VALIDATE (LINTING) -> DEPLOY & ACTIVATE. All outbound calls MUST go through `ZCL_API_FWK=>execute_api`.
 
-Step 0: Planning & Drafting
-Required Skill: [Skill: Scratchpad], [Skill: SAP Integration & API Analyzer]
-Action: Use [Skill: SAP Integration & API Analyzer] to analyze the requirements and check SAP Accelerator Hub for existing standard APIs. If a custom API is required, draft the Outbound API architecture. Analyze trigger points, data extraction logic, payload structure, and response handling.
-Save the draft to `generated_docs/scratchpads/scratchpad_outbound_[API_Name].md`.
+## Phase 0 — Input Validation Gate
 
-Step 1: Create Data Dictionary Objects
-Required Skill: [Skill: ABAP Cloud / Clean Core]
-Action: Create necessary structures (DDLS/TABL/TTYP) representing the Request payload (data to send) and expected Response.
-Execute: Lint -> Push -> Activate.
+0.0 VALIDATE INPUT: check Package, TR, Trigger Point, Endpoint Details, Request/Response structure, and Success/Failure Handling are all present and concrete (not placeholders). Missing/vague → 0.1, else → 0.2.
 
-Step 2: Implement Outbound Integration Logic
-Required Skill: [Skill: RAP], [Skill: Clean ABAP], [Skill: Modern ABAP Syntax], [Skill: OO Design Patterns]
-Action: 
-- If triggered by RAP, implement the behavior action (e.g. `FOR MODIFY`). Use Modern ABAP Syntax to map and process data.
-- Gather business data (e.g. read Sales Order details).
-- Construct the request payload and headers using `zif_api_fwk_types=>ty_dynamic_request`.
-- Call `NEW zcl_api_fwk( )->execute_api( EXPORTING iv_api_id = ... is_dynamic_request_value = ... IMPORTING es_logger = ... CHANGING c_response_data = ... )`.
-- Parse the `es_logger` and response payload.
-- Update the business object status (Success/Failure) and return explicit Reported messages to the UI.
-Execute: Lint -> Push -> Activate.
+0.1 GRILL-ME ON GAPS: [Skill: Grill Me] (max 1-3 targeted questions).
 
-Step 3: Framework Configuration
-Action: Provide detailed instructions to the User to configure the Outbound API URL, Auth, Method, and Headers via Fiori App `ZUI_API_CONFIG_O4`.
+0.2 PLANNING & DRAFTING: [Skill: Scratchpad] + [Skill: Integration & API Analyzer] — check the SAP Accelerator Hub for an existing standard API before assuming a custom one is needed; analyze trigger points, data extraction logic, payload structure, response handling. Save to `artifacts/scratchpads/scratchpad_outbound_[API_Name].md` (doubles as the build ledger).
 
-Step 4: Verification & Walkthrough
-Required Skill: [Skill: ABAP Unit Testing]
-Action: Verify logic locally if mock data is available. Ensure that the object states are handled correctly on success/failure.
-Create a Walkthrough artifact at `generated_docs/walkthroughs/walkthrough_outbound_[API_Name].md`.
+## Phase 1 — Build
+
+Step 1 — Data Dictionary Objects: [Skill: ABAP Cloud / Clean Core] + [Skill: Naming Conventions]. Create DDLS/TABL/TTYP representing the Request payload and expected Response. Execute: Lint → Push → Activate.
+
+Step 2 — Outbound Integration Logic: [Skill: RAP], [Skill: Clean ABAP], [Skill: Modern ABAP Syntax], [Skill: OO Design Patterns], [Skill: Naming Conventions]. If triggered by RAP, implement the behavior action (e.g. `FOR MODIFY`) using Modern ABAP Syntax. Gather business data, construct the request payload/headers via `zif_api_fwk_types=>ty_dynamic_request`, call `NEW zcl_api_fwk( )->execute_api( EXPORTING iv_api_id = ... is_dynamic_request_value = ... IMPORTING es_logger = ... CHANGING c_response_data = ... )`, parse `es_logger`/response, update the business object status, return explicit Reported messages. Execute: Lint → Push → Activate.
+
+Step 3 — Framework Configuration: instruct the user to configure the Outbound API URL/Auth/Method/Headers via Fiori App `ZUI_API_CONFIG_O4`.
+
+## Phase 2 — Manual Integration Verify Loop (max 3 iterations)
+
+2.0 Ask the user to actually trigger the outbound call (via the real RAP action/report/batch job) against the real or sandboxed target endpoint, and report back what the target system received/logged plus the resulting SAP object status.
+
+2.1 Evidence floor (`sap-dev-rule.md` §11): a bare "looks fine" is not a PASS — ask again for the actual target-system response/log before recording a result. Log each attempt in the Scratchpad ledger's Verify Attempts table.
+
+2.2 Compare against the Success/Failure Handling spec from [INPUT DATA]. PASS → Phase 3. MISMATCH → root-cause the actual request/response (do not guess), fix, redeploy, ask the user to re-test. After 3 mismatch iterations, STOP and report the concrete unresolved discrepancy (`sap-dev-rule.md` §7). If the user insists on accepting an unverified result, record it as "PASS — unverified, user-accepted", never as a plain PASS.
+
+## Phase 3 — Walkthrough
+
+Save `artifacts/walkthroughs/walkthrough_outbound_[API_Name].md`: objects built, the actual Phase 2 call evidence (payload sent + target response — never "should work"), and any outstanding risks.
 
 [OUTPUT FORMAT]
-For each step, provide:
-- The Object Name & Applied Skill (e.g., ZC_MY_REPORT - [Skill: RAP]).
-- The exact validated ABAP source code (markdown).
-- The SYSTEM EXECUTION RESULT: Validation Log and Activation Status.
+Per step, in [Skill: Caveman] style (short, evidence-based): Object Name & Applied Skill (e.g., `ZR_MY_OUTBOUND` — [Skill: RAP]); the validated ABAP source code (markdown); SYSTEM EXECUTION RESULT (Validation Log, Activation Status).

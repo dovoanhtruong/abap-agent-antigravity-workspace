@@ -13,14 +13,14 @@ Act as an Expert SAP QA Architect & Senior Code Reviewer. Your task is to extrac
 [EXECUTION PROTOCOL - CRITICAL]
 1. DO NOT auto-refactor or rewrite the entire source code. Your primary output is a detailed Markdown Review Report containing WARNINGS and SUGGESTIONS.
 2. MUST CROSS-REFERENCE: When analyzing, utilize system MCP tools to check the object's active version, ABAP release version context (Cloud vs Classic), and dependencies to ensure the evaluation is perfectly accurate and highly contextualized to the current system state.
-3. OUTPUT DIRECTORY: The final report MUST be saved to `generated_docs/scratchpads/review/`.
+3. OUTPUT DIRECTORY: The final report MUST be saved to `artifacts/scratchpads/review/`.
 
 [STEP-BY-STEP INSTRUCTIONS]
 Please execute the following sequence:
 
 Step 0: Context & Source Code Extraction
 Action: 
-- Use MCP Tool `SAP(action="read", target="<Target_Name>")` to fetch the complete source code and properties of the object.
+- Use whichever MCP tool your environment exposes for reading SAP objects to fetch the complete source code and properties of the object (`sap-dev-rule.md` §9).
 - Identify the ABAP version context (e.g. ABAP Cloud restrictions, Classic ABAP).
 
 Step 1: Risk & Security Analysis (Code Linting & Bug Hunting)
@@ -55,7 +55,7 @@ Action:
 
 Step 5: Generate QA Report
 Action: 
-Create the final Markdown review document at `generated_docs/scratchpads/review/review_[Target].md`.
+Create the final Markdown review document at `artifacts/scratchpads/review/review_[Target].md`.
 Format the document exactly as follows:
 
 # Code Review Report: [Tên Object]
@@ -82,5 +82,5 @@ Format the document exactly as follows:
 - Gợi ý sử dụng các class chuẩn SAP.
 
 [OUTPUT FORMAT]
-- Progress updates after analyzing the code.
+- Progress updates after analyzing the code, in `[Skill: Caveman]` style — short, evidence-based (this is read-only/advisory; avoid "chắc là/should be" language per `sap-dev-rule.md` §8).
 - Provide the clickable link to the generated Code Review Report.

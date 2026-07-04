@@ -1,5 +1,5 @@
 ---
-name: SAP Data Model Extractor
+name: Data Model Extractor
 description: Kỹ năng phân tích tài liệu Functional Specification (FS) để trích xuất chính xác cấu trúc dữ liệu nền tảng, bao gồm các bảng, CDS Views, điều kiện Join, trường khóa và các bộ lọc bắt buộc cho hệ thống SAP ABAP Cloud / RAP.
 ---
 

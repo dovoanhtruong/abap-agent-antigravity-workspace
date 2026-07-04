@@ -3,7 +3,7 @@ description: Sử dụng workflow này khi có yêu cầu tạo mới một API 
 ---
 
 [ROLE & OBJECTIVE]
-Act as an Expert SAP Integration Architect & ABAP Cloud Developer. Your task is to design, implement, and validate an INBOUND API integration that adheres strictly to the `Z_API_FWK` framework in the `bmw_dev` system.
+Act as an Expert SAP Integration Architect & ABAP Cloud Developer. Design, implement, and validate an INBOUND API integration that adheres strictly to the `Z_API_FWK` framework.
 
 [INPUT DATA]
 - Package Name: [Điền tên Package]
@@ -13,44 +13,43 @@ Act as an Expert SAP Integration Architect & ABAP Cloud Developer. Your task is 
 - API Design Details (Method, Auth, Headers, Params): [Chi tiết API]
 - Success/Failure Criteria: [Định nghĩa thành công/thất bại và luồng xử lý]
 
-[EXECUTION PROTOCOL - CRITICAL]
-After generating the ABAP code for each step, you MUST follow this precise lifecycle:
-GENERATE -> VALIDATE (LINTING) -> DEPLOY & ACTIVATE.
-All errors MUST be caught using `CX_ROOT` or `ZCX_API_FWK` and returned explicitly.
+[GOVERNING RULES]
+This workflow operates under the Iron Laws, Red Flags, and Token Efficiency rules in `sap-dev-rule.md` (§6-10). In particular: activation success is not completion evidence — Phase 3 below verifies with a real inbound call; progress/log output uses [Skill: Caveman].
 
-[STEP-BY-STEP INSTRUCTIONS]
-Please execute the following sequence:
+[EXECUTION PROTOCOL — CRITICAL]
+After generating the ABAP code for each step: GENERATE -> VALIDATE (LINTING) -> DEPLOY & ACTIVATE. All errors MUST be caught using `CX_ROOT` or `ZCX_API_FWK` and returned explicitly.
 
-Step 0: Planning & Drafting
-Required Skill: [Skill: Scratchpad], [Skill: SAP Integration & API Analyzer]
-Action: Use [Skill: SAP Integration & API Analyzer] to analyze the requirements and check SAP Accelerator Hub for existing standard APIs. If a custom API is required, draft the Inbound API architecture. Analyze the JSON/XML payload and map it to ABAP Dictionary structures. Define the HTTP logic, success/error handling criteria. 
-Save the draft to `generated_docs/scratchpads/scratchpad_inbound_[API_Name].md`.
+## Phase 0 — Input Validation Gate
 
-Step 1: Create Data Dictionary Objects
-Required Skill: [Skill: ABAP Cloud / Clean Core]
-Action: Create necessary structures (DDLS/TABL/TTYP) to represent the Request and Response data payloads mapped from the input requirement.
-Execute: Lint -> Push -> Activate.
+0.0 VALIDATE INPUT: check Package, TR, Request/Response data structure, API Design Details, and Success/Failure Criteria are all present and concrete (not placeholders). Missing/vague → 0.1, else → 0.2.
 
-Step 2: Implement Handler Class
-Required Skill: [Skill: Clean ABAP], [Skill: Released ABAP Classes], [Skill: Modern ABAP Syntax], [Skill: OO Design Patterns]
-Action: 
-- Create a global class (e.g. `ZCL_IB_[API_NAME]`) that implements the interface `ZIF_API_INBOUND_HANDLER`. Apply OO Design Patterns (e.g., Strategy) if handling multiple payload types.
-- Implement `handle_request` method:
-  - Parse the input payload (e.g. using helper classes like `xco_cp_json` or `zcl_api_fwk=>json_to_abap`).
-  - Execute core business logic (e.g. EML to create Sales Order or Business Object).
-  - Handle success/error clearly. Catch ALL exceptions (including `cx_static_check` and `cx_root`) and return meaningful HTTP Status and error messages in the response payload.
-Execute: Lint -> Push -> Activate.
+0.1 GRILL-ME ON GAPS: [Skill: Grill Me] (max 1-3 targeted questions) to fill exactly the gaps found in 0.0.
 
-Step 3: Framework Configuration
-Action: Provide detailed instructions to the User to configure this new API via Fiori App `ZUI_API_CONFIG_O4`. The user needs to map the API ID to the newly created Handler Class name in the Configuration UI.
+0.2 PLANNING & DRAFTING: [Skill: Scratchpad] + [Skill: Integration & API Analyzer] — check the SAP Accelerator Hub for an existing standard API before assuming a custom one is needed; if custom is required, draft the architecture, map the JSON/XML payload to ABAP Dictionary structures, define HTTP/error-handling logic. Save to `artifacts/scratchpads/scratchpad_inbound_[API_Name].md` (this doubles as the build ledger — TODO/DOING/DONE/FAILED per step).
 
-Step 4: Verification & Walkthrough
-Required Skill: [Skill: ABAP Unit Testing]
-Action: Generate ABAP Unit Tests for the Handler Class using mock data. Ensure all code behaves as expected without Side-effects outside the scope.
-Create a Walkthrough artifact at `generated_docs/walkthroughs/walkthrough_inbound_[API_Name].md`.
+## Phase 1 — Build
+
+Step 1 — Data Dictionary Objects: [Skill: ABAP Cloud / Clean Core] + [Skill: Naming Conventions]. Create DDLS/TABL/TTYP for Request/Response payloads. Execute: Lint → Push → Activate.
+
+Step 2 — Handler Class: [Skill: Clean ABAP], [Skill: Released ABAP Classes], [Skill: Modern ABAP Syntax], [Skill: OO Design Patterns], [Skill: Naming Conventions]. Create a global class (e.g. `ZCL_IB_[API_NAME]`) implementing `ZIF_API_INBOUND_HANDLER`. Apply OO patterns (e.g. Strategy) for multiple payload types. Implement `handle_request`: parse payload (e.g. `xco_cp_json` or `zcl_api_fwk=>json_to_abap`), execute core business logic (EML), catch all exceptions (`cx_static_check`, `cx_root`) and return explicit HTTP status/error messages. Execute: Lint → Push → Activate.
+
+Step 3 — Framework Configuration: instruct the user to configure the API via Fiori App `ZUI_API_CONFIG_O4`, mapping the API ID to the new Handler Class.
+
+## Phase 2 — Unit Test (mandatory, not sufficient alone)
+
+[Skill: ABAP Unit Testing]: generate unit tests for the Handler Class using mock data, covering both success and error paths. This proves the class logic in isolation — it does not prove the live endpoint works end-to-end, which is why Phase 3 exists.
+
+## Phase 3 — Manual Integration Verify Loop (max 3 iterations)
+
+3.0 Ask the user to send a real (or sandboxed) inbound call to the new endpoint — from the actual external system or a tool like Postman impersonating it — using a representative payload, and report back the actual HTTP response and the resulting SAP object/state.
+
+3.1 Evidence floor (`sap-dev-rule.md` §11): a bare "looks fine" is not a PASS — ask again for the actual response/payload before recording a result. Log each attempt in the Scratchpad ledger's Verify Attempts table.
+
+3.2 Compare against the Success/Failure Criteria from [INPUT DATA]. PASS → Phase 4. MISMATCH → root-cause it (trace the actual request/response, do not guess), fix, redeploy, ask the user to re-test. After 3 mismatch iterations, STOP and report the concrete unresolved discrepancy to the user (`sap-dev-rule.md` §7). If the user insists on accepting an unverified result, record it as "PASS — unverified, user-accepted", never as a plain PASS.
+
+## Phase 4 — Walkthrough
+
+Save `artifacts/walkthroughs/walkthrough_inbound_[API_Name].md`: objects built, unit test results, the actual Phase 3 call evidence (payload + response — never "should work"), and any outstanding risks.
 
 [OUTPUT FORMAT]
-For each step, provide:
-- The Object Name & Applied Skill (e.g., ZCL_IB_CREATE_SO - [Skill: Clean ABAP]).
-- The exact validated ABAP source code (markdown).
-- The SYSTEM EXECUTION RESULT: Validation Log and Activation Status.
+Per step, in [Skill: Caveman] style (short, evidence-based): Object Name & Applied Skill (e.g., `ZCL_IB_CREATE_SO` — [Skill: Clean ABAP]); the validated ABAP source code (markdown); SYSTEM EXECUTION RESULT (Validation Log, Activation Status).

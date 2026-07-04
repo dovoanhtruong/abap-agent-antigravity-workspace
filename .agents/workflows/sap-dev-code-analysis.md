@@ -23,14 +23,14 @@ Please execute the following sequence:
 Step 0: System Scanning & Component Discovery
 Required Skill: [Skill: Scratchpad]
 Action:
-- Use MCP Tool `SAP(action="read", target="<Target_Name>")` or `SAP(action="search", ...)` to get the initial structure/list of objects.
-- Create a `scratchpad_analysis_[Target].md` in `generated_docs/scratchpads/`.
+- Use whichever MCP tool your environment exposes for reading/searching SAP objects to get the initial structure/list of objects (`sap-dev-rule.md` §9).
+- Create a `scratchpad_analysis_[Target].md` in `artifacts/scratchpads/`.
 - Document the tree structure in the scratchpad and select the top priority objects that contain the core logic/data models.
 
 Step 1: Deep Dive Analysis
 Required Skill: [Skill: ABAP Logic & Behavior Translator] & [Skill: Data Model Extractor]
 Action:
-- Sequentially read the source codes of the prioritized objects using MCP Tool `SAP(action="read")`.
+- Sequentially read the source codes of the prioritized objects using the same verified MCP tool.
 - Analyze:
   - Data Model: How tables and CDS views are linked (Joins, Associations).
   - Business Logic: What the main ABAP Classes/Methods do.
@@ -40,7 +40,7 @@ Action:
 Step 2: Generate Final Technical Report
 Action:
 Create the final, comprehensive Markdown document. 
-Location: `generated_docs/system_analysis/analysis_report_[Target].md`.
+Location: `artifacts/system_analysis/analysis_report_[Target].md`.
 Format the document exactly as follows:
 
 # [Tên Đối Tượng/Package] - System Analysis Report
@@ -70,5 +70,5 @@ Format the document exactly as follows:
 - Những điểm cần lưu ý khi bảo trì hoặc mở rộng (Extensibility) trong tương lai.
 
 [OUTPUT FORMAT]
-- Report status after completing Step 0, Step 1, and Step 2.
+- Report status after completing Step 0, Step 1, and Step 2 in `[Skill: Caveman]` style — short, evidence-based (this is a read-only analysis; still avoid "chắc là/should be" language per `sap-dev-rule.md` §8, cite what was actually read).
 - Provide the clickable link to the generated Final Technical Report.
