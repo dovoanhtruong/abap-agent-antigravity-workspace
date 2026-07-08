@@ -38,10 +38,12 @@ abap_workspaces/
 │   │   │   ├── abap/ , abap-cloud/ , clean-abap/ , naming-convension/ , modern-abap-syntax/ , oo-design-patterns/ ...
 │   │   │   └── rap/ , cds-view-entities/ , odata/ , authorization-iam/ , abap-generative-ai/ ...
 │   │   └── Productivity/           # 🚀 Performance Optimization & Context Management skills
-│   │       └── grill-me/ , caveman/ , handoff/ , scratchpad/
+│   │       └── grill-me/ , caveman/ , handoff/ , scratchpad/ , activation-guard/
 │   └── workflows/                  # ⚙️ Business process automation scripts
-│       ├── sap-dev-fs-analytic.md  # Process for analyzing FS into Technical Spec
-│       ├── sap-dev-create-report.md# Process for auto-generating ABAP RAP reports
+│       ├── sap-dev-fs-analytic.md  # Process for analyzing FS into Technical Spec (data on existing released CDS)
+│       ├── sap-dev-create-report.md# Process for auto-generating ABAP RAP reports (read-mostly, on released CDS)
+│       ├── sap-dev-fs-analytic-transactional-app.md  # Process for analyzing FS into Technical Spec (new Z-table from scratch)
+│       ├── sap-dev-create-transactional-app.md       # Process for building DDIC + full RAP tree from scratch
 │       ├── sap-dev-api-inbound.md  # Process for Inbound API integration based on Z_API_FWK
 │       ├── sap-dev-api-outbound.md # Process for Outbound API integration based on Z_API_FWK
 │       ├── sap-dev-bug-fix.md      # Process for root-cause debugging & regression-safe fixes
@@ -64,7 +66,7 @@ abap_workspaces/
 
 ### 1. Agent Capability Router (`SKILLS_ROUTER.md`)
 This is the central directory managing all Skills. When you assign a task, the Agent automatically matches keywords in your request with this directory to dynamically load the necessary technical context, avoiding context bloat and optimizing token usage.
-* **Context Optimization:** The system supports parallel loading of **Productivity** skills (e.g., `Scratchpad` for drafting before coding, `Handoff` for context transition, `Grill Me` for interview-style clarification, `Caveman` for terse chat narration) alongside technical skills, helping maintain coherent system thinking.
+* **Context Optimization:** The system supports parallel loading of **Productivity** skills (e.g., `Scratchpad` for drafting before coding, `Handoff` for context transition, `Grill Me` for interview-style clarification, `Caveman` for terse chat narration, `Activation Guard` for post-change verification) alongside technical skills, helping maintain coherent system thinking.
 
 ### 2. Automated Development Rules (`rules/sap-dev-rule.md`)
 A single, deliberately compact rule file (11 short sections, always loaded) — kept dense on purpose so it doesn't get lost in a long session. It forces the Agent to strictly follow:
@@ -73,12 +75,15 @@ A single, deliberately compact rule file (11 short sections, always loaded) — 
 * **Custom Only (Z/Y):** Only operate on custom Z/Y objects of the project. Do not modify SAP standard objects.
 * **TR & Package:** Every new/modified object must clearly declare a Package and a Transport Request.
 * **Evidence-Based Reporting:** "Activated" ≠ "Correct" — every completion claim must cite actual evidence (command run, output observed, or a real payload the user provided), never "should work / probably fine."
+* **Activation Guard:** every object create/edit/delete across the system-touching workflows below runs the `Activation Guard` skill's 3 gates (full activation log incl. warnings, confirmed active state, ripple/cross-impact check on dependents) before that step counts as done — this is what stops one quietly-broken object cascading into every object built on top of it later in the same run.
 * **Token Efficiency:** Chat narration uses the `Caveman` skill (see below) to stay terse — but never on code, saved reports, or security/consent warnings.
 
 ### 3. Automation Scripts (Workflows)
 Use dedicated Slash Commands designed for complex processes:
-* `/sap-dev-fs-analytic`: Automatically triggers the Consultant skill chain to deeply analyze Word/PDF FS files, extract the Data Model structure, Fiori Elements layout, balance calculation/fallback logic, and output a standard Technical Specification.
-* `/sap-dev-create-report`: Takes a Technical Spec as input, automatically triggers the Developer skill chain to write clean code, create CDS View Entities, Access Controls (DCL), Business Services, RAP BO Behavior Pools, and perform automated testing.
+* `/sap-dev-fs-analytic`: Automatically triggers the Consultant skill chain to deeply analyze Word/PDF FS files, extract the Data Model structure, Fiori Elements layout, balance calculation/fallback logic, and output a standard Technical Specification. Assumes the FS's data already lives in an existing released CDS view.
+* `/sap-dev-create-report`: Takes a Technical Spec as input, automatically triggers the Developer skill chain to write clean code, create CDS View Entities, Access Controls (DCL), Business Services, RAP BO Behavior Pools, and perform automated testing. Assumes the data already exists in a released standard CDS view.
+* `/sap-dev-fs-analytic-transactional-app`: Same 6-phase design as `/sap-dev-fs-analytic`, but for an FS describing a brand-new Chức năng (Transactional App) with no existing table/view — its Data Model phase *designs* the new Z-table structure (fields/types/keys, status machine, numbering strategy) instead of just looking one up, and its Coding Implementation Plan always includes a DDIC Foundation step group.
+* `/sap-dev-create-transactional-app`: Same 4-phase design as `/sap-dev-create-report`, but for a brand-new Chức năng (Transactional App) built from zero — designs & creates the DDIC Foundation (Domain, Data Element, Z-Table + Draft Table, Number Range, Message Class) first, then the full RAP composition tree (root + children) with actions/validations/determinations, supporting classes, and the OData service binding.
 * `/sap-dev-bug-fix`: Root-causes a reported bug against user-provided mock data, gets explicit approval on a Cross-Impact Report before touching anything, then fixes it with a mandatory ABAP Unit Test as regression proof.
 * `/sap-dev-api-inbound`: Build external API receiving functionalities adhering to the `Z_API_FWK` architecture.
 * `/sap-dev-api-outbound`: Build outbound calls to other systems ensuring logging mechanisms and response handling via `execute_api`.
@@ -97,7 +102,9 @@ Send an analysis request to the Agent with the document path.
 * *Example:* `"Please trigger the /sap-dev-fs-analytic workflow to analyze the FS document [SAPER_2025_PM_FS.docx](./artifacts/fs_docs/SAPER_2025_PM_FS.docx) belonging to Package Z_INVENTORY_REPORT"`
 
 ### Step 3: Evaluate Technical Spec & Generate Code
-After the Agent completes the analysis and returns a standard Technical Specification structure, please review it. Then, trigger the `/sap-dev-create-report` command for the Agent to automatically generate comprehensive ABAP RAP code for you.
+After the Agent completes the analysis and returns a standard Technical Specification structure, please review it. Then trigger the matching build workflow: `/sap-dev-create-report` if TS §3 lists only existing released CDS views, or `/sap-dev-create-transactional-app` if TS §3 defines brand-new Z-tables (TS §2 will state `Target Build Workflow: /sap-dev-create-transactional-app`).
+
+> For a brand-new Chức năng with no existing table/view at all, use `/sap-dev-fs-analytic-transactional-app` instead of `/sap-dev-fs-analytic` in Step 2 above, so the resulting TS includes the DDIC Foundation design `/sap-dev-create-transactional-app` needs.
 
 ---
 
